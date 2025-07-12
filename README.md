@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тюнинг Авто</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #222;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #0f0;
+    }
+
+    nav {
+      background-color: #333;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav a {
+      color: #0f0;
+      margin: 0 15px;
+      text-decoration: none;
+    }
+
+    section {
+      padding: 20px;
+    }
+
+    .card {
+      background-color: #1b1b1b;
+      border: 1px solid #333;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #222;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Тюнинг Автомобилей</h1>
+  <p>Мощность. Стиль. Индивидуальность.</p>
+</header>
+
+<nav>
+  <a href="#services">Что мы делаем</a>
+  <a href="#contact">Контакты</a>
+</nav>
+
+<section id="services">
+  <h2>Наши услуги</h2>
+
+  <div class="card">
+    <h3>Чип-тюнинг двигателя</h3>
+    <p>Увеличим мощность, снизим расход топлива и раскроем потенциал вашего авто.</p>
+  </div>
+
+  <div class="card">
+    <h3>Внешний тюнинг</h3>
+    <p>Бамперы, обвесы, винил, диски, подсветка – сделаем твой автомобиль уникальным.</p>
+  </div>
+
+  <div class="card">
+    <h3>Тюнинг салона</h3>
+    <p>Перетяжка салона, установка мультимедиа, шумоизоляция и многое другое.</p>
+  </div>
+</section>
+
+<section id="contact">
+  <h2>Контакты</h2>
+  <p>📍 Тбилиси, Грузия</p>
+  <p>📞 +995 555 123 456</p>
+  <p>📧 tuning@yourgarage.com</p>
+</section>
+
+<footer>
+  <p>&copy; 2025 Тюнинг Авто. Все права защищены.</p>
+</footer>
+
+</body>
+</html>
