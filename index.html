@@ -1,40 +1,41 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ავტო-ტუნინგი | ECU</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ავტო-ტუნინგი</title>
   <style>
     body {
       margin: 0;
-      background-color: #111;
-      color: #f1f1f1;
-      font-family: Arial, sans-serif;
+      background: #0d0d0d;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', sans-serif;
     }
 
     header {
-      background-color: #000;
-      padding: 20px;
+      background: #000;
+      padding: 40px 20px;
       text-align: center;
     }
 
     header h1 {
       margin: 0;
-      font-size: 28px;
+      font-size: 36px;
       color: #00ccff;
     }
 
     nav {
-      background-color: #191919;
-      padding: 10px;
+      background: #1a1a1a;
+      padding: 10px 0;
       text-align: center;
     }
 
     nav a {
-      color: #ddd;
+      color: #ccc;
+      margin: 0 20px;
       text-decoration: none;
-      margin: 0 15px;
       font-weight: bold;
+      transition: color 0.3s;
     }
 
     nav a:hover {
@@ -42,60 +43,67 @@
     }
 
     .container {
-      max-width: 1000px;
-      margin: 30px auto;
-      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+      padding: 30px 20px;
     }
 
-    .service-block {
-      background-color: #1a1a1a;
+    .block {
+      background: #1a1a1a;
+      margin-bottom: 30px;
       padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
 
-    .service-block h2 {
+    .block h2 {
       color: #00ccff;
       margin-top: 0;
     }
 
-    .gallery-grid {
+    .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
       margin-top: 20px;
     }
 
-    .gallery-grid img {
-      width: 100%;
+    .gallery-item {
+      background: #0d0d0d;
       border-radius: 10px;
-      transition: transform 0.3s;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
-    .gallery-grid img:hover {
+    .gallery-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover img {
       transform: scale(1.05);
     }
 
-    .gallery-grid p {
+    .gallery-item p {
       text-align: center;
-      margin-top: 10px;
+      padding: 10px;
       font-size: 14px;
       color: #ccc;
     }
 
     footer {
-      background-color: #000;
-      padding: 20px;
       text-align: center;
       font-size: 14px;
-      color: #888;
+      padding: 20px;
+      background: #000;
+      color: #666;
       border-top: 1px solid #333;
     }
 
     a {
       color: #00ccff;
-      text-decoration: none;
     }
 
     a:hover {
@@ -106,72 +114,53 @@
 <body>
 
   <header>
-    <h1>ავტო-ტუნინგი და ECU ჩიპი</h1>
+    <h1>ავტო-ტუნინგი</h1>
   </header>
 
   <nav>
     <a href="#">მთავარი</a>
     <a href="#">სერვისები</a>
+    <a href="#">გალერეა</a>
     <a href="#">კონტაქტი</a>
   </nav>
 
   <div class="container">
-
-    <div class="service-block">
-      <h2>🔧 ECU დიაგნოსტიკა</h2>
-      <p>სწრაფი და ზუსტი დიაგნოსტიკა OBD-II სისტემით, კოდების წაკითხვა და წაშლა.</p>
+    <div class="block">
+      <h2>🔧 სერვისები</h2>
+      <ul>
+        <li>ECU დიაგნოსტიკა</li>
+        <li>ცხენის ძალების მომატება</li>
+        <li>წყლის და ზეთის ტემპერატურის დაქვეითება</li>
+        <li>Popcorn & Burble რეჟიმი</li>
+        <li>BimmerCode – ფარული ფუნქციების გააქტიურება</li>
+        <li>ხმის გაძლიერება გლუშიტელის გადაკეთების გარეშე</li>
+      </ul>
     </div>
 
-    <div class="service-block">
-      <h2>🚀 ცხენის ძალების მომატება</h2>
-      <p>ECU-ის გადაპროგრამება ძრავის მუშაობის ოპტიმიზაციისთვის.</p>
-    </div>
-
-    <div class="service-block">
-      <h2>🌡️ ტემპერატურის კონტროლი</h2>
-      <p>წყლის და ზეთის ოპტიმალური ტემპერატურის შენარჩუნება, სენსორების ჩაწერა.</p>
-    </div>
-
-    <div class="service-block">
-      <h2>🔥 Popcorn & Burble რეჟიმი</h2>
-      <p>ტურბო და ატმოსფერული ძრავებისთვის სპეციალური ხმა გადართვის დროს.</p>
-    </div>
-
-    <div class="service-block">
-      <h2>🧠 BimmerCode და ფარული ფუნქციები</h2>
-      <p>BMW მოდელებისთვის ფარული ფუნქციების გააქტიურება ტელეფონიდან.</p>
-    </div>
-
-    <div class="service-block">
-      <h2>🔊 გლუშიტელის ხმის გაძლიერება</h2>
-      <p>ხმის დონე — გადაკეთების გარეშე. ექო, გრუხუნი და სხვა ეფექტები.</p>
-    </div>
-
-    <div class="service-block">
-      <h2>📸 BMW ტუნინგ გალერეა</h2>
-      <div class="gallery-grid">
-        <div>
-          <img src="https://cdn.pixabay.com/photo/2020/02/20/19/33/car-4863785_1280.jpg" alt="BMW X5 Tuning">
-          <p>BMW X5 ტუნინგი</p>
+    <div class="block">
+      <h2>📸 BMW გალერეა</h2>
+      <div class="gallery">
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1571939228382-b2f2b585ce15?auto=format&fit=crop&w=800&q=80" alt="BMW X5 Tuning">
+          <p>BMW X5 Stage 2</p>
         </div>
-        <div>
-          <img src="https://cdn.pixabay.com/photo/2021/09/10/07/12/car-6612067_1280.jpg" alt="BMW E92 Burble">
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1603386329225-868f9dc8a2f0?auto=format&fit=crop&w=800&q=80" alt="BMW E92 Tuning">
           <p>BMW E92 Burble Mode</p>
         </div>
-        <div>
-          <img src="https://cdn.pixabay.com/photo/2017/03/27/13/42/bmw-2170607_1280.jpg" alt="BMW Interior Coding">
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=800&q=80" alt="Interior coding">
           <p>ინტერიერის კოდირება</p>
         </div>
       </div>
     </div>
 
-    <div class="service-block">
+    <div class="block">
       <h2>📞 კონტაქტი</h2>
-      <p><strong>ტელეფონი:</strong> +995 598 12 34 56<br>
-         <strong>ქვეყანა / ქალაქი:</strong> საქართველო, თბილისი<br>
-         <strong>Email:</strong> <a href="mailto:tuning@example.com">tuning@example.com</a></p>
+      <p><strong>ტელეფონი:</strong> +995 598 12 34 56</p>
+      <p><strong>ქვეყანა / ქალაქი:</strong> საქართველო, თბილისი</p>
+      <p><strong>ელფოსტა:</strong> <a href="mailto:tuning@example.com">tuning@example.com</a></p>
     </div>
-
   </div>
 
   <footer>
