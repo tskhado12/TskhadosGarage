@@ -177,7 +177,7 @@
     }
   </style>
 </head>
-<body>
+<body onbeforeunload="window.scrollTo(0, 0);">
   <header>
     <h1>ავტო-ტუნინგი</h1>
   </header>
@@ -228,7 +228,7 @@
   <section id="iframeSection" class="iframe-wrapper">
     <h2>startmycar.com</h2>
     <div class="iframe-mask" id="iframeMasked">
-      <iframe src="https://www.startmycar.com/" style="margin-top: -260px;"></iframe>
+      <iframe src="https://www.startmycar.com/" style="margin-top: -240px;"></iframe>
     </div>
     <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
