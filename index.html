@@ -228,7 +228,7 @@
   <section id="iframeSection" class="iframe-wrapper">
     <h2>startmycar.com</h2>
     <div class="iframe-mask" id="iframeMasked">
-      <iframe id="startMyCarFrame" src="https://www.startmycar.com/" style="margin-top: -210px; pointer-events: none;"></iframe>
+      <iframe id="startMyCarFrame" src="https://www.startmycar.com/" style="margin-top: -210px;"></iframe>
     </div>
     <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
@@ -254,6 +254,7 @@
   
 }
   let iframe = document.getElementById("startMyCarFrame");
+iframe.style.pointerEvents = "none";
 let previousUrl = "https://www.startmycar.com/";
 
 setInterval(() => {
@@ -261,6 +262,7 @@ setInterval(() => {
     const currentUrl = iframe.contentWindow.location.href;
     if (currentUrl !== previousUrl) {
       iframe.style.pointerEvents = "auto";
+      clearInterval(scrollResetInterval);
     }
   } catch (e) {
     // Возможно блокировка из-за CORS, ничего не делаем
