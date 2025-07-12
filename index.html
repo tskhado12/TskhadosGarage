@@ -131,23 +131,32 @@
       color: var(--primary);
     }
 
-    .iframe-container {
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      border-top: 1px solid #222;
-      overflow: hidden;
-      position: relative;
+    .fake-iframe {
+      background-color: #1a1a1a;
+      padding: 40px;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
     }
 
-    .iframe-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      transform: scale(1.05);
-      transform-origin: top center;
+    .fake-iframe p {
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+
+    .fake-iframe .button {
+      background-color: var(--primary);
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      display: inline-block;
+    }
+
+    .fake-iframe .button:hover {
+      background-color: #0c70d4;
     }
 
     footer {
@@ -208,8 +217,9 @@
 
   <section class="iframe-wrapper">
     <h2>startmycar.com → ძრავის ტექნიკური რესურსი</h2>
-    <div class="iframe-container">
-      <iframe src="https://www.startmycar.com/fuse-box/bmw/x5"></iframe>
+    <div class="fake-iframe">
+      <p>გადასვლა BMW X5-ის დენის სქემებზე და სხვა ტექნიკურ დეტალებზე</p>
+      <a href="https://www.startmycar.com/fuse-box/bmw/x5" target="_blank" class="button">ნახე სქემები</a>
     </div>
   </section>
 
