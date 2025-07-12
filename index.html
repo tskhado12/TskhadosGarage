@@ -2,187 +2,147 @@
 <html lang="ka">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ავტო-ტუნინგი | BMW</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ავტო-ტუნინგი</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --primary: #1e90ff;
+      --background: #0e0e0e;
+      --surface: #161616;
+      --text: #f1f1f1;
+      --muted: #999;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      margin: 0;
-      background-color: #0f0f0f;
-      color: #e2e2e2;
       font-family: 'Segoe UI', sans-serif;
+      background: var(--background);
+      color: var(--text);
       line-height: 1.6;
     }
 
     header {
-      background-color: #000;
-      padding: 30px 20px;
+      padding: 40px 20px;
       text-align: center;
+      background-color: var(--surface);
     }
 
     header h1 {
-      margin: 0;
+      color: var(--primary);
       font-size: 36px;
-      color: #00ccff;
-      letter-spacing: 1px;
     }
 
     nav {
-      background-color: #1e1e1e;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
       padding: 15px 0;
-      text-align: center;
+      background-color: #121212;
     }
 
     nav a {
-      color: #aaa;
-      margin: 0 20px;
+      color: var(--text);
       text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s;
+      font-weight: 500;
+      transition: color 0.3s ease;
     }
 
     nav a:hover {
-      color: #00ccff;
+      color: var(--primary);
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
+    .section {
+      max-width: 1000px;
+      margin: 60px auto;
       padding: 0 20px;
     }
 
-    .block {
-      background-color: #1b1b1b;
-      margin-bottom: 40px;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
-    .block h2 {
-      margin-top: 0;
-      color: #00ccff;
+    .section h2 {
       font-size: 28px;
+      color: var(--primary);
+      margin-bottom: 20px;
     }
 
-    .block ul {
+    .services ul {
       list-style: none;
-      padding: 0;
-      margin: 10px 0 0;
+      padding-left: 0;
     }
 
-    .block ul li::before {
-      content: "✔️";
-      margin-right: 8px;
+    .services li::before {
+      content: '✔';
+      margin-right: 10px;
+      color: var(--primary);
     }
 
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
     }
 
-    .gallery-item {
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px;
-      background-color: #141414;
-      transition: transform 0.3s ease;
-    }
-
-    .gallery-item img {
+    .gallery img {
       width: 100%;
-      display: block;
-      aspect-ratio: 16/9;
+      border-radius: 10px;
       object-fit: cover;
-      transition: transform 0.5s ease;
+      aspect-ratio: 16 / 9;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
-    .gallery-item:hover img {
-      transform: scale(1.05);
-    }
-
-    .gallery-item p {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      margin: 0;
-      padding: 12px;
-      background: rgba(0,0,0,0.6);
-      color: #eee;
-      font-size: 16px;
-      text-align: center;
+    .contact p {
+      margin-bottom: 10px;
     }
 
     footer {
-      background-color: #000;
-      padding: 20px;
       text-align: center;
+      padding: 20px;
+      color: var(--muted);
       font-size: 14px;
-      color: #555;
-      border-top: 1px solid #222;
-    }
-
-    a {
-      color: #00ccff;
-    }
-
-    a:hover {
-      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-
   <header>
-    <h1>ავტო‑ტუნინგი BMW</h1>
+    <h1>ავტო-ტუნინგი</h1>
   </header>
-
   <nav>
-    <a href="#">მთავარი</a>
     <a href="#services">სერვისები</a>
     <a href="#gallery">გალერეა</a>
     <a href="#contact">კონტაქტი</a>
   </nav>
 
-  <div class="container">
+  <section id="services" class="section services">
+    <h2>სერვისები</h2>
+    <ul>
+      <li>ECU დიაგნოსტიკა და პროგრამირება</li>
+      <li>ცხენის ძალების ოპტიმიზაცია (Stage 1–3)</li>
+      <li>ტემპერატურის კონტროლი: წყალი, ზეთი</li>
+      <li>Popcorn & Burble ხმა გადართვის დროს</li>
+      <li>BimmerCode – BMW ფარული ფუნქციები</li>
+      <li>გლუშიტელის ხმა – მარტივი ეფექტები გადაკეთების გარეშე</li>
+    </ul>
+  </section>
 
-    <section id="services" class="block">
-      <h2>🔧 სერვისები</h2>
-      <ul>
-        <li>ECU დიაგნოსტიკა და პროგრამირება</li>
-        <li>ცხენის ძალების ოპტიმიზაცია (Stage 1–3)</li>
-        <li>ტემპერატურის კონტროლი: წყალი, ზეთი</li>
-        <li>Popcorn & Burble ხმა გადართვის დროს</li>
-        <li>BimmerCode – BMW ფარული ფუნქციები</li>
-        <li>გლუშიტელის ხმა – მარტივი ეფექტები გადაკეთების გარეშე</li>
-      </ul>
-    </section>
+  <section id="gallery" class="section">
+    <h2>გალერეა</h2>
+    <div class="gallery">
+      <img src="wp2015598.webp" alt="BMW E92 tuning" />
+    </div>
+  </section>
 
-    <section id="gallery" class="block">
-      <h2>📸 გალერეა</h2>
-      <div class="gallery">
-        <div class="gallery-item">
-          <img src="wp2015598.webp" alt="BMW E92 tuning">
-          <p>BMW E92 – პერსონალურად შესრულებული ტუნინგი</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact" class="block">
-      <h2>📞 კონტაქტი</h2>
-      <p>📱 <strong>+995 598 12 34 56</strong><br>
-      🌍 <strong>თბილისი, საქართველო</strong><br>
-      📧 <a href="mailto:tuning@example.com">tuning@example.com</a></p>
-    </section>
-
-  </div>
+  <section id="contact" class="section contact">
+    <h2>კონტაქტი</h2>
+    <p>📞 ტელეფონი: +995 598 12 34 56</p>
+    <p>🌍 თბილისი, საქართველო</p>
+    <p>✉️ ელფოსტა: <a href="mailto:tuning@example.com">tuning@example.com</a></p>
+  </section>
 
   <footer>
-    © 2025 ავტო‑ტუნინგი. ყველა უფლება დაცულია.
+    © 2025 ავტო-ტუნინგი. ყველა უფლება დაცულია.
   </footer>
-
 </body>
 </html>
