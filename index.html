@@ -228,7 +228,7 @@
   <section id="iframeSection" class="iframe-wrapper">
     <h2>startmycar.com</h2>
     <div class="iframe-mask" id="iframeMasked">
-      <iframe src="https://www.startmycar.com/" style="margin-top: -210px;"></iframe>
+      <iframe id="startMyCarFrame" src="https://www.startmycar.com/" style="margin-top: -210px; pointer-events: none;"></iframe>
     </div>
     <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
@@ -247,9 +247,26 @@
 
   <script>
     function unmaskIframe() {
-      document.getElementById("iframeMasked").style.display = "none";
-      document.getElementById("iframeUnmasked").style.display = "block";
+  const unmasked = document.getElementById("iframeUnmasked");
+  const masked = document.getElementById("iframeMasked");
+  masked.style.display = "none";
+  unmasked.style.display = "block";
+  document.body.style.overflow = "auto";
+}
+  document.body.style.overflow = "hidden";
+let iframe = document.getElementById("startMyCarFrame");
+let previousUrl = "https://www.startmycar.com/";
+
+setInterval(() => {
+  try {
+    const currentUrl = iframe.contentWindow.location.href;
+    if (currentUrl !== previousUrl) {
+      iframe.style.pointerEvents = "auto";
     }
-  </script>
+  } catch (e) {
+    // Возможно блокировка из-за CORS, ничего не делаем
+  }
+}, 500);
+</script>
 </body>
 </html>
