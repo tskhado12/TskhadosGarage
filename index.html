@@ -123,6 +123,7 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
       overflow: hidden;
+      text-align: center;
     }
 
     .iframe-wrapper h2 {
@@ -131,18 +132,20 @@
       color: var(--primary);
     }
 
-    .iframe-container {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border: none;
-      overflow: hidden;
-      border-radius: 10px;
+    .fusebox-button {
+      display: inline-block;
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 24px;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 8px;
+      margin-top: 10px;
+      transition: background 0.3s ease;
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .fusebox-button:hover {
+      background-color: #1570d0;
     }
 
     footer {
@@ -202,10 +205,10 @@
   </section>
 
   <section class="iframe-wrapper">
-    <h2>startmycar.com → BMW X5 Fuse Box Diagram</h2>
-    <div class="iframe-container">
-      <iframe src="https://www.startmycar.com/fuse-box/bmw/x5" loading="lazy"></iframe>
-    </div>
+    <h2>ნახე StartMyCar-ზე Fuse Box სქემა</h2>
+    <a class="fusebox-button" href="https://www.startmycar.com/fuse-box/bmw/x5" target="_blank">
+      გადადი fuse box სქემებზე →
+    </a>
   </section>
 
   <section id="contact" class="section contact">
