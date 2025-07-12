@@ -2,76 +2,124 @@
 <html lang="ka">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ავტო-ტუნინგი</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ავტო-ტუნინგი | ECU</title>
   <style>
     body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
       background-color: #111;
       color: #f1f1f1;
+      font-family: Arial, sans-serif;
     }
     header {
-      background: #0d0d0d;
+      background-color: #000;
       padding: 20px;
       text-align: center;
-      font-size: 32px;
-      font-weight: bold;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
       color: #00ccff;
     }
-    section {
-      max-width: 800px;
+    nav {
+      background-color: #191919;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      color: #ddd;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    nav a:hover {
+      color: #00ccff;
+    }
+    .container {
+      max-width: 1000px;
       margin: 30px auto;
       padding: 20px;
+    }
+    .service-block {
       background-color: #1a1a1a;
+      padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
-    h2 {
+    .service-block h2 {
       color: #00ccff;
-      margin-bottom: 10px;
-    }
-    ul {
-      line-height: 1.8;
+      margin-top: 0;
     }
     footer {
+      background-color: #000;
+      padding: 20px;
       text-align: center;
       font-size: 14px;
-      padding: 20px;
-      color: #999;
+      color: #888;
       border-top: 1px solid #333;
-      margin-top: 50px;
     }
     a {
       color: #00ccff;
       text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
 
   <header>
-    🏎️ ავტო-ტუნინგი
+    <h1>ავტო-ტუნინგი და ECU ჩიპი</h1>
   </header>
 
-  <section>
-    <h2>სერვისები:</h2>
-    <ul>
-      <li>დიაგნოსტიკა</li>
-      <li>ცხენის ძალების მომატება</li>
-      <li>წყლის და ზეთის ტემპერატურების დაწევა</li>
-      <li>Popcorn & Burble რეჟიმების ჩაწერა</li>
-      <li>BimmerCode-ით კოდირება (ფარული ფუნქციების გააქტიურება)</li>
-      <li>გლუშიტელის გადაკეთების გარეშე ხმის გაძლიერება</li>
-    </ul>
-  </section>
+  <nav>
+    <a href="#">მთავარი</a>
+    <a href="#">სერვისები</a>
+    <a href="#">კონტაქტი</a>
+  </nav>
 
-  <section>
-    <h2>კონტაქტი:</h2>
-    <p>📞 <strong>+995 598 12 34 56</strong></p>
-    <p>🌍 საქართველო, თბილისი</p>
-    <p>✉️ <a href="mailto:tuning@example.com">tuning@example.com</a></p>
-  </section>
+  <div class="container">
+
+    <div class="service-block">
+      <h2>🔧 ECU დიაგნოსტიკა</h2>
+      <p>სწრაფი და ზუსტი დიაგნოსტიკა OBD-II სისტემით, კოდების წაკითხვა და წაშლა.</p>
+    </div>
+
+    <div class="service-block">
+      <h2>🚀 ცხენის ძალების მომატება</h2>
+      <p>ECU-ის გადაპროგრამება ძრავის მუშაობის ოპტიმიზაციისთვის.</p>
+    </div>
+
+    <div class="service-block">
+      <h2>🌡️ ტემპერატურის კონტროლი</h2>
+      <p>წყლის და ზეთის ოპტიმალური ტემპერატურის შენარჩუნება, სენსორების ჩაწერა.</p>
+    </div>
+
+    <div class="service-block">
+      <h2>🔥 Popcorn & Burble რეჟიმი</h2>
+      <p>ტურბო და ატმოსფერული ძრავებისთვის სპეციალური ხმა გადართვის დროს.</p>
+    </div>
+
+    <div class="service-block">
+      <h2>🧠 BimmerCode და ფარული ფუნქციები</h2>
+      <p>BMW მოდელებისთვის ფარული ფუნქციების გააქტიურება ტელეფონიდან.</p>
+    </div>
+
+    <div class="service-block">
+      <h2>🔊 გლუშიტელის ხმის გაძლიერება</h2>
+      <p>ხმის დონე — გადაკეთების გარეშე. ექო, გრუხუნი და სხვა ეფექტები.</p>
+    </div>
+
+    <div class="service-block">
+      <h2>📞 კონტაქტი</h2>
+      <p><strong>ტელეფონი:</strong> +995 598 12 34 56<br>
+      <strong>ქვეყანა / ქალაქი:</strong> საქართველო, თბილისი<br>
+      <strong>Email:</strong> <a href="mailto:tuning@example.com">tuning@example.com</a></p>
+    </div>
+
+  </div>
 
   <footer>
     © 2025 ავტო-ტუნინგი. ყველა უფლება დაცულია.
