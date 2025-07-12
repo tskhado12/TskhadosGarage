@@ -267,6 +267,13 @@ setInterval(() => {
     // Возможно блокировка из-за CORS, ничего не делаем
   }
 }, 500);
+const scrollResetInterval = setInterval(() => {
+  try {
+    iframe.contentWindow.scrollTo(0, 0);
+  } catch (e) {
+    // Нельзя получить доступ к iframe из-за CORS — игнорируем
+  }
+}, 500);
 </script>
 </body>
 </html>
