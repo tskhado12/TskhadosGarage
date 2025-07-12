@@ -268,11 +268,17 @@ setInterval(() => {
     // Возможно блокировка из-за CORS, ничего не делаем
   }
 }, 500);
-const scrollResetInterval = setInterval(() => {
+let scrollResetInterval = setInterval(() => {
   try {
-    iframe.contentWindow.scrollTo(0, 0);
+    const currentUrl = iframe.contentWindow.location.href;
+    if (currentUrl !== previousUrl) {
+      iframe.style.pointerEvents = "auto";
+      clearInterval(scrollResetInterval);
+    } else {
+      iframe.contentWindow.scrollTo(0, 0);
+    }
   } catch (e) {
-    // Нельзя получить доступ к iframe из-за CORS — игнорируем
+    // CORS issue — do nothing
   }
 }, 500);
 </script>
