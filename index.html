@@ -1,111 +1,123 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ავტო-ტუნინგი</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ავტო-ტუნინგი | BMW X5</title>
   <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
     body {
       margin: 0;
-      background: #0d0d0d;
-      color: #f0f0f0;
+      background-color: #0f0f0f;
+      color: #e2e2e2;
       font-family: 'Segoe UI', sans-serif;
+      line-height: 1.6;
     }
 
     header {
-      background: #000;
-      padding: 40px 20px;
+      background-color: #000;
+      padding: 30px 20px;
       text-align: center;
     }
-
     header h1 {
       margin: 0;
       font-size: 36px;
       color: #00ccff;
+      letter-spacing: 1px;
     }
 
     nav {
-      background: #1a1a1a;
-      padding: 10px 0;
+      background-color: #1e1e1e;
+      padding: 15px 0;
       text-align: center;
     }
-
     nav a {
-      color: #ccc;
+      color: #aaa;
       margin: 0 20px;
       text-decoration: none;
-      font-weight: bold;
+      font-weight: 600;
       transition: color 0.3s;
     }
-
     nav a:hover {
       color: #00ccff;
     }
 
     .container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 30px 20px;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
     }
 
     .block {
-      background: #1a1a1a;
-      margin-bottom: 30px;
-      padding: 20px;
+      background-color: #1b1b1b;
+      margin-bottom: 40px;
+      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .block h2 {
+      margin-top: 0;
+      color: #00ccff;
+      font-size: 28px;
     }
 
-    .block h2 {
-      color: #00ccff;
-      margin-top: 0;
+    .block ul {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0;
+    }
+    .block ul li::before {
+      content: "✔️";
+      margin-right: 8px;
     }
 
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      gap: 24px;
       margin-top: 20px;
     }
-
     .gallery-item {
-      background: #0d0d0d;
-      border-radius: 10px;
+      position: relative;
       overflow: hidden;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: auto;
-      display: block;
+      border-radius: 12px;
+      background-color: #141414;
       transition: transform 0.3s ease;
     }
-
+    .gallery-item img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
     .gallery-item:hover img {
       transform: scale(1.05);
     }
-
     .gallery-item p {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      margin: 0;
+      padding: 12px;
+      background: rgba(0,0,0,0.6);
+      color: #eee;
+      font-size: 16px;
       text-align: center;
-      padding: 10px;
-      font-size: 14px;
-      color: #ccc;
     }
 
     footer {
+      background-color: #000;
+      padding: 20px;
       text-align: center;
       font-size: 14px;
-      padding: 20px;
-      background: #000;
-      color: #666;
-      border-top: 1px solid #333;
+      color: #555;
+      border-top: 1px solid #222;
     }
-
     a {
       color: #00ccff;
     }
-
     a:hover {
       text-decoration: underline;
     }
@@ -114,57 +126,59 @@
 <body>
 
   <header>
-    <h1>ავტო-ტუნინგი</h1>
+    <h1>ავტო‑ტუნინგი BMW X5</h1>
   </header>
 
   <nav>
     <a href="#">მთავარი</a>
-    <a href="#">სერვისები</a>
-    <a href="#">გალერეა</a>
-    <a href="#">კონტაქტი</a>
+    <a href="#services">სერვისები</a>
+    <a href="#gallery">გალერეა</a>
+    <a href="#contact">კონტაქტი</a>
   </nav>
 
   <div class="container">
-    <div class="block">
+
+    <section id="services" class="block">
       <h2>🔧 სერვისები</h2>
       <ul>
-        <li>ECU დიაგნოსტიკა</li>
-        <li>ცხენის ძალების მომატება</li>
-        <li>წყლის და ზეთის ტემპერატურის დაქვეითება</li>
-        <li>Popcorn & Burble რეჟიმი</li>
-        <li>BimmerCode – ფარული ფუნქციების გააქტიურება</li>
-        <li>ხმის გაძლიერება გლუშიტელის გადაკეთების გარეშე</li>
+        <li>ECU დიაგნოსტიკა და პროგრამირება</li>
+        <li>ცხენის ძალების ოპტიმიზაცია (Stage 1–3)</li>
+        <li>ტემპერატურის კონტროლი: წყალი, ზეთი</li>
+        <li>Popcorn & Burble ხმა გადართვის დროს</li>
+        <li>BimmerCode – BMW ფარული ფუნქციები</li>
+        <li>გლუშიტელის ხმა – მარტივი ეფექტები გადაკეთების გარეშე</li>
       </ul>
-    </div>
+    </section>
 
-    <div class="block">
-      <h2>📸 BMW გალერეა</h2>
+    <section id="gallery" class="block">
+      <h2>📸 გალერეა</h2>
       <div class="gallery">
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1571939228382-b2f2b585ce15?auto=format&fit=crop&w=800&q=80" alt="BMW X5 Tuning">
-          <p>BMW X5 Stage 2</p>
+          <img src="https://i.imgur.com/ZDbC6lD.jpg" alt="BMW X5 tuned silver">
+          <p>BMW X5 – დეტუნინგი და წრთობა</p>
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1603386329225-868f9dc8a2f0?auto=format&fit=crop&w=800&q=80" alt="BMW E92 Tuning">
-          <p>BMW E92 Burble Mode</p>
+          <img src="https://i.imgur.com/qW8m3wY.jpg" alt="BMW X5 black tuning">
+          <p>Matt Black BMW X5 – აგრესიული ვიზუალი</p>
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=800&q=80" alt="Interior coding">
-          <p>ინტერიერის კოდირება</p>
+          <img src="https://i.imgur.com/0lzQe8R.jpg" alt="BMW X5 interior">
+          <p>ინტერიერის კოდირება და მოდერნიზაცია</p>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="block">
+    <section id="contact" class="block">
       <h2>📞 კონტაქტი</h2>
-      <p><strong>ტელეფონი:</strong> +995 598 12 34 56</p>
-      <p><strong>ქვეყანა / ქალაქი:</strong> საქართველო, თბილისი</p>
-      <p><strong>ელფოსტა:</strong> <a href="mailto:tuning@example.com">tuning@example.com</a></p>
-    </div>
+      <p>📱 <strong>+995 598 12 34 56</strong><br>
+      🌍 <strong>თბილისი, საქართველო</strong><br>
+      📧 <a href="mailto:tuning@example.com">tuning@example.com</a></p>
+    </section>
+
   </div>
 
   <footer>
-    © 2025 ავტო-ტუნინგი. ყველა უფლება დაცულია.
+    © 2025 ავტო‑ტუნინგი. ყველა უფლება დაცულია.
   </footer>
 
 </body>
