@@ -132,20 +132,10 @@
       color: var(--primary);
     }
 
-    .fusebox-button {
-      display: inline-block;
-      background-color: var(--primary);
-      color: white;
-      padding: 12px 24px;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 8px;
-      margin-top: 10px;
-      transition: background 0.3s ease;
-    }
-
-    .fusebox-button:hover {
-      background-color: #1570d0;
+    .iframe-container {
+      width: 100%;
+      height: 600px;
+      border: none;
     }
 
     footer {
@@ -205,10 +195,10 @@
   </section>
 
   <section class="iframe-wrapper">
-    <h2>ნახე StartMyCar-ზე Fuse Box სქემა</h2>
-    <a class="fusebox-button" href="https://www.startmycar.com/fuse-box/bmw/x5" target="_blank">
-      გადადი fuse box სქემებზე →
-    </a>
+    <h2>startmycar.com</h2>
+    <div class="iframe-container">
+      <iframe src="https://www.startmycar.com/" width="100%" height="100%" style="border:0;"></iframe>
+    </div>
   </section>
 
   <section id="contact" class="section contact">
