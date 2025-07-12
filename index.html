@@ -177,7 +177,7 @@
     }
   </style>
 </head>
-<body onload="scrollToSearch()">
+<body>
   <header>
     <h1>ავტო-ტუნინგი</h1>
   </header>
@@ -228,7 +228,7 @@
   <section id="iframeSection" class="iframe-wrapper">
     <h2>startmycar.com</h2>
     <div class="iframe-mask" id="iframeMasked">
-      <iframe src="https://www.startmycar.com/"></iframe>
+      <iframe src="https://www.startmycar.com/" style="margin-top: -220px;"></iframe>
     </div>
     <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
@@ -249,13 +249,6 @@
     function unmaskIframe() {
       document.getElementById("iframeMasked").style.display = "none";
       document.getElementById("iframeUnmasked").style.display = "block";
-    }
-
-    function scrollToSearch() {
-      const target = document.getElementById("iframeSection");
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
     }
   </script>
 </body>
