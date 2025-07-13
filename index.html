@@ -113,7 +113,9 @@
       margin-bottom: 10px;
     }
 
-    .google-search {
+    .google-search,
+    .vin-search,
+    .compare-search {
       margin-top: 60px;
       padding: 20px;
       text-align: center;
@@ -121,7 +123,9 @@
       border-radius: 10px;
     }
 
-    .google-search input {
+    .google-search input,
+    .vin-search input,
+    .compare-search input {
       padding: 10px;
       font-size: 16px;
       margin: 10px;
@@ -131,7 +135,9 @@
       border: 1px solid #444;
     }
 
-    .google-search button {
+    .google-search button,
+    .vin-search button,
+    .compare-search button {
       padding: 10px 16px;
       font-size: 16px;
       background-color: var(--primary);
@@ -141,7 +147,9 @@
       cursor: pointer;
     }
 
-    .google-search button:hover {
+    .google-search button:hover,
+    .vin-search button:hover,
+    .compare-search button:hover {
       background-color: #1570d0;
     }
 
@@ -257,14 +265,6 @@
     </div>
   </section>
 
-  <section class="section google-search">
-    <h2>მანქანების შედარება Google-ით Drom.ru-ზე</h2>
-    <input type="text" id="gcar1" placeholder="მანქანა 1" />
-    <input type="text" id="gcar2" placeholder="მანქანა 2" />
-    <br />
-    <button onclick="googleCompare()">ძიება</button>
-  </section>
-
   <section id="iframeSection" class="iframe-wrapper">
     <h2>startmycar.com</h2>
     <div class="iframe-mask" id="iframeMasked">
@@ -272,6 +272,19 @@
     </div>
     <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
+  </section>
+
+  <section class="vin-search">
+    <h2>VIN კოდის შემოწმება</h2>
+    <input id="vinInput" type="text" placeholder="შეიყვანეთ VIN კოდი" />
+    <button onclick="checkVin()">შემოწმება</button>
+  </section>
+
+  <section class="compare-search">
+    <h2>მანქანების შედარება</h2>
+    <input id="car1" type="text" placeholder="მანქანა 1" />
+    <input id="car2" type="text" placeholder="მანქანა 2" />
+    <button onclick="compareCars()">შედარება</button>
   </section>
 
   <section id="contact" class="section contact">
@@ -286,16 +299,6 @@
   </footer>
 
   <script>
-    function googleCompare() {
-      const car1 = document.getElementById("gcar1").value.trim();
-      const car2 = document.getElementById("gcar2").value.trim();
-      if (!car1 || !car2) return alert("შეიყვანე ორივე მანქანა");
-      const query1 = `site:drom.ru/catalog/ ${car1}`;
-      const query2 = `site:drom.ru/catalog/ ${car2}`;
-      window.open(`https://www.google.com/search?q=${encodeURIComponent(query1)}`, '_blank');
-      window.open(`https://www.google.com/search?q=${encodeURIComponent(query2)}`, '_blank');
-    }
-
     const iframe = document.getElementById("startMyCarFrame");
     const initialMarginTop = -210;
     let scrollEnforced = true;
@@ -310,6 +313,23 @@
       document.getElementById("iframeUnmasked").style.display = "block";
       scrollEnforced = false;
       clearInterval(restoreScroll);
+    }
+
+    function checkVin() {
+      const vin = document.getElementById("vinInput").value.trim();
+      if (!vin) return alert("გთხოვთ შეიყვანეთ VIN კოდი");
+      const url = `https://www.karmafv.com/autocheck.php?VIN=${vin}&id=780`;
+      window.open(url, "_blank");
+    }
+
+    function compareCars() {
+      const car1 = document.getElementById("car1").value.trim();
+      const car2 = document.getElementById("car2").value.trim();
+      if (!car1 || !car2) return alert("გთხოვთ შეიყვანეთ ორივე მანქანის სახელი");
+      const url1 = `https://www.google.com/search?q=${car1}+характеристики+site:drom.ru/catalog`;
+      const url2 = `https://www.google.com/search?q=${car2}+характеристики+site:drom.ru/catalog`;
+      window.open(url1, '_blank');
+      window.open(url2, '_blank');
     }
   </script>
 </body>
