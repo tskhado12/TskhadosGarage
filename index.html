@@ -177,7 +177,7 @@
     }
   </style>
 </head>
-<body onbeforeunload="window.scrollTo(0, 0);">
+<body>
   <header>
     <h1>ავტო-ტუნინგი</h1>
   </header>
@@ -247,40 +247,11 @@
 
   <script>
     function unmaskIframe() {
-  const unmasked = document.getElementById("iframeUnmasked");
-  const masked = document.getElementById("iframeMasked");
-  masked.style.display = "none";
-  unmasked.style.display = "block";
-  
-}
-  let iframe = document.getElementById("startMyCarFrame");
-// iframe.style.pointerEvents = "none";
-let previousUrl = "https://www.startmycar.com/";
-
-setInterval(() => {
-  try {
-    const currentUrl = iframe.contentWindow.location.href;
-    if (currentUrl !== previousUrl) {
-      iframe.style.pointerEvents = "auto";
-      clearInterval(scrollResetInterval);
+      const unmasked = document.getElementById("iframeUnmasked");
+      const masked = document.getElementById("iframeMasked");
+      masked.style.display = "none";
+      unmasked.style.display = "block";
     }
-  } catch (e) {
-    // Возможно блокировка из-за CORS, ничего не делаем
-  }
-}, 500);
-let scrollResetInterval = setInterval(() => {
-  try {
-    const currentUrl = iframe.contentWindow.location.href;
-    if (currentUrl !== previousUrl) {
-      iframe.style.pointerEvents = "auto";
-      clearInterval(scrollResetInterval);
-    } else {
-      iframe.contentWindow.scrollTo(0, 0);
-    }
-  } catch (e) {
-    // CORS issue — do nothing
-  }
-}, 500);
-</script>
+  </script>
 </body>
 </html>
