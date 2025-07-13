@@ -132,39 +132,10 @@
       color: var(--primary);
     }
 
-    .iframe-mask {
-      position: relative;
+    iframe {
       width: 100%;
-      height: 160px;
-      overflow: hidden;
-    }
-
-    .iframe-mask iframe {
-      width: 100%;
-      height: 600px;
+      height: 650px;
       border: none;
-      transform: translateY(-210px);
-    }
-
-    .iframe-full {
-      width: 100%;
-      height: 900px;
-      border: none;
-      display: none;
-    }
-
-    .iframe-unmask-button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin-top: 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .iframe-unmask-button:hover {
-      background: #1570d0;
     }
 
     footer {
@@ -173,18 +144,68 @@
       color: var(--muted);
       font-size: 14px;
     }
-    .overlay-block {
-      position: absolute;
-      top: 160px;
-      left: 0;
-      width: 100%;
-      height: 500px;
-      background-color: #111;
-      z-index: 10;
-    }
   </style>
 </head>
 <body>
-  <!-- BODY CONTENT UNCHANGED -->
+  <header>
+    <h1>ავტო-ტუნინგი</h1>
+  </header>
+  <nav>
+    <a href="#services">სერვისები</a>
+    <a href="#gallery">გალერეა</a>
+    <a href="#contact">კონტაქტი</a>
+  </nav>
+  <div class="section" id="services">
+    <h2>სერვისები</h2>
+    <div class="service-grid">
+      <div class="service-tile">
+        <h3>დიაგნოსტიკა</h3>
+        <p>ზუსტი ანალიზი მანქანის სისტემების.</p>
+      </div>
+      <div class="service-tile">
+        <h3>ცხ.ძალის მომატება</h3>
+        <p>ავტო ძრავის ოპტიმიზაცია მეტი სიმძლავრისთვის.</p>
+      </div>
+      <div class="service-tile">
+        <h3>ტემპერატურის კონტროლი</h3>
+        <p>ზეთისა და წყლის ტემპერატურის სტაბილიზაცია.</p>
+      </div>
+      <div class="service-tile">
+        <h3>პოპკორნი & ბარბლი</h3>
+        <p>ექსკლუზიური ხმოვანი ეფექტები თქვენი მანქანისთვის.</p>
+      </div>
+      <div class="service-tile">
+        <h3>BimmerCode</h3>
+        <p>ფუნქციების გააქტიურება & კოდირება BMW-სთვის.</p>
+      </div>
+      <div class="service-tile">
+        <h3>ხმაურის ოპტიმიზაცია</h3>
+        <p>ხმის მომატება გლუშიტელის გარეშე.</p>
+      </div>
+    </div>
+  </div>
+  <div class="section" id="gallery">
+    <h2>გალერეა</h2>
+    <div class="gallery">
+      <img src="wp2015598.webp" alt="BMW E92" />
+      <img src="WhatsAppImage2021-07-13at6.46.58PM_1.webp" alt="Car Tuning" />
+    </div>
+  </div>
+  <div class="section" id="contact">
+    <h2>კონტაქტი</h2>
+    <div class="contact">
+      <p><strong>ტელეფონი:</strong> +995 555 12 34 56</p>
+      <p><strong>ქვეყანა:</strong> საქართველო</p>
+      <p><strong>ქალაქი:</strong> თბილისი</p>
+      <p><strong>Email:</strong> tuning@example.com</p>
+    </div>
+  </div>
+  <div class="iframe-wrapper">
+    <h2>StartMyCar – დამატებითი სერვისები</h2>
+    <iframe src="https://www.startmycar.com" allowfullscreen></iframe>
+  </div>
+  <footer>
+    © 2025 ავტო-ტუნინგი. ყველა უფლება დაცულია.
+  </footer>
 </body>
 </html>
