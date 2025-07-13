@@ -305,6 +305,11 @@ setInterval(() => {
   }
 }, 1000);
 
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && scrollLocked) {
+    document.getElementById("startMyCarFrame").style.height = "700px";
+  }
+});
 </script>
 </body>
 </html>
