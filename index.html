@@ -284,21 +284,11 @@
   }
 
 
-// Detect scroll jump inside iframe visually via position
-let lastTop = 0;
-const detectScrollJump = setInterval(() => {
-  try {
-    const rect = iframe.getBoundingClientRect();
-    const top = rect.top;
-    const delta = Math.abs(top - lastTop);
-    if (delta > 100 && scrollLocked === true) {
-      iframe.style.height = "700px";
-    }
-    lastTop = top;
-  } catch (e) {
-    // Ignore
+iframe.addEventListener("load", () => {
+  if (scrollLocked) {
+    iframe.style.height = "700px";
   }
-}, 1000);
+});
 
 </script>
 </body>
