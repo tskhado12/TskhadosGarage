@@ -284,12 +284,18 @@
   }
 
 
-const resizeObserver = new ResizeObserver(() => {
-  if (scrollLocked) {
+// ვაკვირდებით iframe-ის src URL-ს ცვლილებას
+setInterval(() => {
+  try {
+    const currentSrc = document.getElementById("startMyCarFrame").contentWindow.location.href;
+    if (scrollLocked && currentSrc !== "https://www.startmycar.com/") {
+      iframe.style.height = "700px";
+    }
+  } catch (e) {
+    // CORS დაცვა, ვერ წვდებით — მაშასადამე ალბათ შეიცვალა გვერდი
     iframe.style.height = "700px";
   }
-});
-resizeObserver.observe(iframe);
+}, 1000);
 
 </script>
 </body>
