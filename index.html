@@ -251,16 +251,21 @@
   const iframe = document.getElementById("startMyCarFrame");
   let scrollLocked = true;
 
-  const resetTransform = setInterval(() => {
+  // Detect iframe scroll attempt and reset position
+  let lastTransform = "translateY(-210px)";
+  const enforceLock = () => {
     if (!scrollLocked) return;
-    iframe.style.transform = "translateY(-210px)";
-  }, 500);
+    const currentTransform = getComputedStyle(iframe).transform;
+    iframe.style.transform = lastTransform;
+  };
+
+  const interval = setInterval(enforceLock, 300);
 
   function unmaskIframe() {
     scrollLocked = false;
     iframeMasked.style.display = "none";
     iframeUnmasked.style.display = "block";
-    clearInterval(resetTransform);
+    clearInterval(interval);
   }
 </script>
 </body>
