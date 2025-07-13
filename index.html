@@ -113,6 +113,38 @@
       margin-bottom: 10px;
     }
 
+    .google-search {
+      margin-top: 60px;
+      padding: 20px;
+      text-align: center;
+      background-color: var(--surface);
+      border-radius: 10px;
+    }
+
+    .google-search input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+      width: 40%;
+      max-width: 300px;
+      border-radius: 6px;
+      border: 1px solid #444;
+    }
+
+    .google-search button {
+      padding: 10px 16px;
+      font-size: 16px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .google-search button:hover {
+      background-color: #1570d0;
+    }
+
     .iframe-wrapper {
       margin-top: 60px;
       max-width: 1000px;
@@ -167,52 +199,6 @@
 
     .iframe-unmask-button:hover {
       background: #1570d0;
-    }
-
-    .vin-search, .compare-section {
-      margin-top: 80px;
-      padding: 20px;
-      background-color: var(--surface);
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .vin-search input, .compare-section input {
-      padding: 10px;
-      font-size: 16px;
-      width: 40%;
-      max-width: 300px;
-      border-radius: 6px;
-      border: 1px solid #444;
-      margin: 10px;
-    }
-
-    .vin-search button, .compare-section button {
-      padding: 10px 16px;
-      font-size: 16px;
-      margin-top: 10px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .vin-search button:hover, .compare-section button:hover {
-      background-color: #1570d0;
-    }
-
-    .compare-iframe-wrapper {
-      display: flex;
-      gap: 20px;
-      margin-top: 20px;
-      justify-content: center;
-    }
-
-    .compare-iframe-wrapper iframe {
-      width: 100%;
-      height: 600px;
-      border: none;
     }
 
     footer {
@@ -271,6 +257,14 @@
     </div>
   </section>
 
+  <section class="section google-search">
+    <h2>მანქანების შედარება Google-ით Drom.ru-ზე</h2>
+    <input type="text" id="gcar1" placeholder="მანქანა 1" />
+    <input type="text" id="gcar2" placeholder="მანქანა 2" />
+    <br />
+    <button onclick="googleCompare()">ძიება</button>
+  </section>
+
   <section id="iframeSection" class="iframe-wrapper">
     <h2>startmycar.com</h2>
     <div class="iframe-mask" id="iframeMasked">
@@ -278,27 +272,6 @@
     </div>
     <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
-  </section>
-
-  <section class="section vin-search">
-    <h2>VIN კოდის შემოწმება</h2>
-    <input type="text" id="vinCode" placeholder="შეიყვანე VIN კოდი" />
-    <button onclick="checkVin()">შეამოწმე</button>
-    <div style="margin-top: 20px; display: none;" id="vinResult">
-      <iframe id="vinFrame" width="100%" height="600px" style="border: none;"></iframe>
-    </div>
-  </section>
-
-  <section class="section compare-section">
-    <h2>მანქანების შედარება</h2>
-    <input type="text" id="car1" placeholder="პირველი მანქანა" />
-    <input type="text" id="car2" placeholder="მეორე მანქანა" />
-    <br />
-    <button onclick="compareCars()">შედარება</button>
-    <div class="compare-iframe-wrapper" id="compareResult" style="display:none">
-      <iframe id="carFrame1"></iframe>
-      <iframe id="carFrame2"></iframe>
-    </div>
   </section>
 
   <section id="contact" class="section contact">
@@ -313,6 +286,16 @@
   </footer>
 
   <script>
+    function googleCompare() {
+      const car1 = document.getElementById("gcar1").value.trim();
+      const car2 = document.getElementById("gcar2").value.trim();
+      if (!car1 || !car2) return alert("შეიყვანე ორივე მანქანა");
+      const query1 = `site:drom.ru/catalog/ ${car1}`;
+      const query2 = `site:drom.ru/catalog/ ${car2}`;
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query1)}`, '_blank');
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query2)}`, '_blank');
+    }
+
     const iframe = document.getElementById("startMyCarFrame");
     const initialMarginTop = -210;
     let scrollEnforced = true;
@@ -327,26 +310,6 @@
       document.getElementById("iframeUnmasked").style.display = "block";
       scrollEnforced = false;
       clearInterval(restoreScroll);
-    }
-
-    function checkVin() {
-      const vin = document.getElementById("vinCode").value.trim();
-      if (!vin) return alert("გთხოვ შეიყვანე VIN კოდი");
-      const result = document.getElementById("vinResult");
-      const frame = document.getElementById("vinFrame");
-      frame.src = `https://www.karmafv.com/autocheck.php?VIN=${encodeURIComponent(vin)}%20&id=780`;
-      result.style.display = "block";
-    }
-
-    function compareCars() {
-      const car1 = document.getElementById("car1").value.trim();
-      const car2 = document.getElementById("car2").value.trim();
-      if (!car1 || !car2) return alert("შეიყვანე ორივე მანქანა");
-      const frame1 = document.getElementById("carFrame1");
-      const frame2 = document.getElementById("carFrame2");
-      frame1.src = `https://www.drom.ru/catalog/?query=${encodeURIComponent(car1)}`;
-      frame2.src = `https://www.drom.ru/catalog/?query=${encodeURIComponent(car2)}`;
-      document.getElementById("compareResult").style.display = "flex";
     }
   </script>
 </body>
