@@ -282,6 +282,22 @@
   
     clearInterval(interval);
   }
+
+
+// Detect page change inside iframe
+let currentURL = "";
+const detectPageChange = setInterval(() => {
+  try {
+    const newURL = iframe.contentWindow.location.href;
+    if (scrollLocked === true && currentURL && newURL !== currentURL) {
+      iframe.style.height = "700px"; // Slightly increase height
+    }
+    currentURL = newURL;
+  } catch (e) {
+    // Ignore CORS errors silently
+  }
+}, 1000);
+
 </script>
 </body>
 </html>
