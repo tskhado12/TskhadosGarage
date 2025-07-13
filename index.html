@@ -246,20 +246,21 @@
 
   
 <script>
-  let scrollLocked = true;
+  const iframeMasked = document.getElementById("iframeMasked");
+  const iframeUnmasked = document.getElementById("iframeUnmasked");
   const iframe = document.getElementById("startMyCarFrame");
-  const resetInterval = setInterval(() => {
+  let scrollLocked = true;
+
+  const resetTransform = setInterval(() => {
     if (!scrollLocked) return;
-    try {
-      iframe.contentWindow.scrollTo({ top: 0, behavior: 'instant' });
-    } catch (e) {}
+    iframe.style.transform = "translateY(-210px)";
   }, 500);
 
   function unmaskIframe() {
-    document.getElementById("iframeMasked").style.display = "none";
-    document.getElementById("iframeUnmasked").style.display = "block";
     scrollLocked = false;
-    clearInterval(resetInterval);
+    iframeMasked.style.display = "none";
+    iframeUnmasked.style.display = "block";
+    clearInterval(resetTransform);
   }
 </script>
 </body>
