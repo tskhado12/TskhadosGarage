@@ -305,9 +305,17 @@ setInterval(() => {
   }
 }, 1000);
 
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Enter" && scrollLocked) {
-    document.getElementById("startMyCarFrame").style.height = "700px";
+const iframeDoc = document.getElementById("startMyCarFrame");
+iframeDoc.addEventListener("load", () => {
+  try {
+    const innerDoc = iframeDoc.contentDocument || iframeDoc.contentWindow.document;
+    innerDoc.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && scrollLocked) {
+        iframeDoc.style.height = "700px";
+      }
+    });
+  } catch (err) {
+    // CORS გამონაკლისი, ვერ ვუსმენთ iframe-ში ღილაკებს
   }
 });
 </script>
