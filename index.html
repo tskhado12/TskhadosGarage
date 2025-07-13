@@ -284,11 +284,12 @@
   }
 
 
-iframe.addEventListener("load", () => {
+const resizeObserver = new ResizeObserver(() => {
   if (scrollLocked) {
     iframe.style.height = "700px";
   }
 });
+resizeObserver.observe(iframe);
 
 </script>
 </body>
