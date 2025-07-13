@@ -285,17 +285,23 @@
 
 
 // ვაკვირდებით iframe-ის src URL-ს ცვლილებას
-let lastURL = "https://www.startmycar.com/";
+let initialSrc = "https://www.startmycar.com/";
+let lastHeight = 0;
+
 setInterval(() => {
+  const frame = document.getElementById("startMyCarFrame");
+  if (!frame) return;
+
   try {
-    const currentURL = document.getElementById("startMyCarFrame").contentWindow.location.href;
-    if (scrollLocked && currentURL !== lastURL) {
-      iframe.style.height = "700px";
-      lastURL = currentURL;
+    const currentSrc = frame.contentWindow.location.href;
+    if (scrollLocked && currentSrc !== initialSrc) {
+      frame.style.height = "700px";
     }
   } catch (e) {
-    // თუ URL წვდომა იშლება, ვგულისხმობთ რომ შეიცვალა
-    if (scrollLocked) iframe.style.height = "700px";
+    // სავარაუდოდ შეიცვალა, რადგან CORS არ გვაძლევს წვდომას
+    if (scrollLocked) {
+      frame.style.height = "700px";
+    }
   }
 }, 1000);
 
