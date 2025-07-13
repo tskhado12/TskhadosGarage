@@ -250,5 +250,25 @@
       document.getElementById("iframeUnmasked").style.display = "block";
     }
   </script>
+<script>
+  // Scroll reset fallback every 500ms
+  let scrollLocked = true;
+  const iframe = document.getElementById("startMyCarFrame");
+  const interval = setInterval(() => {
+    if (!scrollLocked) return;
+    try {
+      iframe.contentWindow.scrollTo(0, 0);
+    } catch (e) {
+      // Do nothing on CORS failure
+    }
+  }, 500);
+
+  function unmaskIframe() {
+    document.getElementById("iframeMasked").style.display = "none";
+    document.getElementById("iframeUnmasked").style.display = "block";
+    scrollLocked = false;
+    clearInterval(interval);
+  }
+</script>
 </body>
 </html>
