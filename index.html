@@ -284,17 +284,19 @@
   }
 
 
-// Detect page change inside iframe
-let currentURL = "";
-const detectPageChange = setInterval(() => {
+// Detect scroll jump inside iframe visually via position
+let lastTop = 0;
+const detectScrollJump = setInterval(() => {
   try {
-    const newURL = iframe.contentWindow.location.href;
-    if (scrollLocked === true && currentURL && newURL !== currentURL) {
-      iframe.style.height = "700px"; // Slightly increase height
+    const rect = iframe.getBoundingClientRect();
+    const top = rect.top;
+    const delta = Math.abs(top - lastTop);
+    if (delta > 100 && scrollLocked === true) {
+      iframe.style.height = "700px";
     }
-    currentURL = newURL;
+    lastTop = top;
   } catch (e) {
-    // Ignore CORS errors silently
+    // Ignore
   }
 }, 1000);
 
