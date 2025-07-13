@@ -169,7 +169,7 @@
       background: #1570d0;
     }
 
-    .vin-search {
+    .vin-search, .compare-section {
       margin-top: 80px;
       padding: 20px;
       background-color: var(--surface);
@@ -177,19 +177,20 @@
       text-align: center;
     }
 
-    .vin-search input {
+    .vin-search input, .compare-section input {
       padding: 10px;
       font-size: 16px;
-      width: 70%;
-      max-width: 400px;
+      width: 40%;
+      max-width: 300px;
       border-radius: 6px;
       border: 1px solid #444;
+      margin: 10px;
     }
 
-    .vin-search button {
+    .vin-search button, .compare-section button {
       padding: 10px 16px;
       font-size: 16px;
-      margin-left: 10px;
+      margin-top: 10px;
       background-color: var(--primary);
       color: white;
       border: none;
@@ -197,8 +198,21 @@
       cursor: pointer;
     }
 
-    .vin-search button:hover {
+    .vin-search button:hover, .compare-section button:hover {
       background-color: #1570d0;
+    }
+
+    .compare-iframe-wrapper {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .compare-iframe-wrapper iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
     }
 
     footer {
@@ -217,7 +231,6 @@
     <a href="#services">სერვისები</a>
     <a href="#gallery">გალერეა</a>
     <a href="#contact">კონტაქტი</a>
-    <a href="#vin">VIN Code</a>
   </nav>
 
   <section id="services" class="section services">
@@ -267,12 +280,24 @@
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
   </section>
 
-  <section id="vin" class="section vin-search">
+  <section class="section vin-search">
     <h2>VIN კოდის შემოწმება</h2>
-    <input type="text" id="vinInput" placeholder="შეიყვანე VIN კოდი" />
-    <button onclick="checkVIN()">ძებნა</button>
-    <div id="vinIframeWrapper" style="margin-top:20px; display:none">
-      <iframe id="vinIframe" width="100%" height="600" style="border:none;"></iframe>
+    <input type="text" id="vinCode" placeholder="შეიყვანე VIN კოდი" />
+    <button onclick="checkVin()">შეამოწმე</button>
+    <div style="margin-top: 20px; display: none;" id="vinResult">
+      <iframe id="vinFrame" width="100%" height="600px" style="border: none;"></iframe>
+    </div>
+  </section>
+
+  <section class="section compare-section">
+    <h2>მანქანების შედარება</h2>
+    <input type="text" id="car1" placeholder="პირველი მანქანა" />
+    <input type="text" id="car2" placeholder="მეორე მანქანა" />
+    <br />
+    <button onclick="compareCars()">შედარება</button>
+    <div class="compare-iframe-wrapper" id="compareResult" style="display:none">
+      <iframe id="carFrame1"></iframe>
+      <iframe id="carFrame2"></iframe>
     </div>
   </section>
 
@@ -294,7 +319,7 @@
 
     const restoreScroll = setInterval(() => {
       if (!scrollEnforced) return;
-      if (iframe) iframe.style.marginTop = initialMarginTop + "px";
+      iframe.style.marginTop = initialMarginTop + "px";
     }, 500);
 
     function unmaskIframe() {
@@ -304,13 +329,24 @@
       clearInterval(restoreScroll);
     }
 
-    function checkVIN() {
-      const vin = document.getElementById("vinInput").value.trim();
-      if (vin.length < 5) return alert("გთხოვ შეიყვანე სწორი VIN კოდი");
-      const fullUrl = `https://www.karmafv.com/autocheck.php?VIN=${vin}%20&id=780`;
-      const vinIframe = document.getElementById("vinIframe");
-      vinIframe.src = fullUrl;
-      document.getElementById("vinIframeWrapper").style.display = "block";
+    function checkVin() {
+      const vin = document.getElementById("vinCode").value.trim();
+      if (!vin) return alert("გთხოვ შეიყვანე VIN კოდი");
+      const result = document.getElementById("vinResult");
+      const frame = document.getElementById("vinFrame");
+      frame.src = `https://www.karmafv.com/autocheck.php?VIN=${encodeURIComponent(vin)}%20&id=780`;
+      result.style.display = "block";
+    }
+
+    function compareCars() {
+      const car1 = document.getElementById("car1").value.trim();
+      const car2 = document.getElementById("car2").value.trim();
+      if (!car1 || !car2) return alert("შეიყვანე ორივე მანქანა");
+      const frame1 = document.getElementById("carFrame1");
+      const frame2 = document.getElementById("carFrame2");
+      frame1.src = `https://www.drom.ru/catalog/?query=${encodeURIComponent(car1)}`;
+      frame2.src = `https://www.drom.ru/catalog/?query=${encodeURIComponent(car2)}`;
+      document.getElementById("compareResult").style.display = "flex";
     }
   </script>
 </body>
