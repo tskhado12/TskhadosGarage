@@ -143,7 +143,7 @@
       width: 100%;
       height: 600px;
       border: none;
-      margin-top: -120px;
+      margin-top: -210px;
       transform: scale(1);
       transform-origin: top center;
     }
@@ -228,7 +228,7 @@
   <section id="iframeSection" class="iframe-wrapper">
     <h2>startmycar.com</h2>
     <div class="iframe-mask" id="iframeMasked">
-      <iframe id="startMyCarFrame" src="https://www.startmycar.com/" style="margin-top: -210px;"></iframe>
+      <iframe id="startMyCarFrame" src="https://www.startmycar.com/"></iframe>
     </div>
     <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
     <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
@@ -246,11 +246,20 @@
   </footer>
 
   <script>
+    const iframe = document.getElementById("startMyCarFrame");
+    const initialMarginTop = -210;
+    let scrollEnforced = true;
+
+    const restoreScroll = setInterval(() => {
+      if (!scrollEnforced) return;
+      iframe.style.marginTop = initialMarginTop + "px";
+    }, 500);
+
     function unmaskIframe() {
-      const unmasked = document.getElementById("iframeUnmasked");
-      const masked = document.getElementById("iframeMasked");
-      masked.style.display = "none";
-      unmasked.style.display = "block";
+      document.getElementById("iframeMasked").style.display = "none";
+      document.getElementById("iframeUnmasked").style.display = "block";
+      scrollEnforced = false;
+      clearInterval(restoreScroll);
     }
   </script>
 </body>
