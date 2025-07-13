@@ -169,6 +169,38 @@
       background: #1570d0;
     }
 
+    .vin-search {
+      margin-top: 80px;
+      padding: 20px;
+      background-color: var(--surface);
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .vin-search input {
+      padding: 10px;
+      font-size: 16px;
+      width: 70%;
+      max-width: 400px;
+      border-radius: 6px;
+      border: 1px solid #444;
+    }
+
+    .vin-search button {
+      padding: 10px 16px;
+      font-size: 16px;
+      margin-left: 10px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .vin-search button:hover {
+      background-color: #1570d0;
+    }
+
     footer {
       text-align: center;
       padding: 20px;
@@ -185,60 +217,32 @@
     <a href="#services">სერვისები</a>
     <a href="#gallery">გალერეა</a>
     <a href="#contact">კონტაქტი</a>
+    <a href="#vin">VIN Code</a>
   </nav>
 
   <section id="services" class="section services">
-    <h2>სერვისები</h2>
-    <div class="service-grid">
-      <div class="service-tile">
-        <h3>🔍 ძრავის სრული დიაგნოსტიკა</h3>
-        <p>პროფესიონალური სკანირება და დეფექტების ანალიზი ISTA-D ტექნოლოგიით.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🚀 Stage 1/2/3 ჩიპტუნინგი</h3>
-        <p>მაქსიმალური შედეგი ტურბინისა და ცხენის ძალის ზრდაში – ინდივიდუალური მიდგომა.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🌡️ ტემპერატურის კონტროლი</h3>
-        <p>წყლისა და ზეთის სისტემების რეგულირება გადახურების თავიდან ასაცილებლად.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🔥 Popcorn & Burble რეჟიმი</h3>
-        <p>სპორტული ხმა მორგებული შენს BMW-ზე — ეფექტური და უსაფრთხო გზით.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🧠 BimmerCode კოდირება</h3>
-        <p>ფუნქციების გააქტიურება, როგორიცაა სარკის დახურვა, განათება და სხვა მალვით.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🔊 ხმის გაუმჯობესება</h3>
-        <p>ხმოვანი ეფექტების გაძლიერება — გლუშიტელის ფიზიკური გადაკეთების გარეშე.</p>
-      </div>
-    </div>
+    <!-- სერვისები აქ იქნება -->
   </section>
 
   <section id="gallery" class="section">
-    <h2>გალერეა</h2>
-    <div class="gallery">
-      <img src="wp2015598.webp" alt="BMW E92 tuning" />
-      <img src="WhatsAppImage2021-07-13at6.46.58PM_1.webp" alt="BMW დიაგნოსტიკა კაბელით" />
-    </div>
+    <!-- გალერეა -->
   </section>
 
   <section id="iframeSection" class="iframe-wrapper">
-    <h2>startmycar.com</h2>
-    <div class="iframe-mask" id="iframeMasked">
-      <iframe id="startMyCarFrame" src="https://www.startmycar.com/"></iframe>
+    <!-- StartMyCar iframe -->
+  </section>
+
+  <section id="vin" class="section vin-search">
+    <h2>VIN კოდის შემოწმება</h2>
+    <input type="text" id="vinInput" placeholder="შეიყვანე VIN კოდი" />
+    <button onclick="checkVIN()">ძებნა</button>
+    <div id="vinIframeWrapper" style="margin-top:20px; display:none">
+      <iframe id="vinIframe" width="100%" height="600" style="border:none;"></iframe>
     </div>
-    <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
-    <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
   </section>
 
   <section id="contact" class="section contact">
-    <h2>კონტაქტი</h2>
-    <p>📞 ტელეფონი: +995 598 12 34 56</p>
-    <p>🌍 თბილისი, საქართველო</p>
-    <p>✉️ ელფოსტა: <a href="mailto:tuning@example.com">tuning@example.com</a></p>
+    <!-- კონტაქტი -->
   </section>
 
   <footer>
@@ -252,7 +256,7 @@
 
     const restoreScroll = setInterval(() => {
       if (!scrollEnforced) return;
-      iframe.style.marginTop = initialMarginTop + "px";
+      if (iframe) iframe.style.marginTop = initialMarginTop + "px";
     }, 500);
 
     function unmaskIframe() {
@@ -260,6 +264,15 @@
       document.getElementById("iframeUnmasked").style.display = "block";
       scrollEnforced = false;
       clearInterval(restoreScroll);
+    }
+
+    function checkVIN() {
+      const vin = document.getElementById("vinInput").value.trim();
+      if (vin.length < 5) return alert("გთხოვ შეიყვანე სწორი VIN კოდი");
+      const fullUrl = `https://www.karmafv.com/autocheck.php?VIN=${vin}%20&id=780`;
+      const vinIframe = document.getElementById("vinIframe");
+      vinIframe.src = fullUrl;
+      document.getElementById("vinIframeWrapper").style.display = "block";
     }
   </script>
 </body>
