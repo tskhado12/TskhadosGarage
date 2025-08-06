@@ -1,356 +1,50 @@
 <!DOCTYPE html>
-<html lang="ka">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ავტო-ტუნინგი</title>
-  <!-- Добавленная строка для favicon -->
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <style>
-    :root {
-      --primary: #1e90ff;
-      --background: #0e0e0e;
-      --surface: #161616;
-      --text: #f1f1f1;
-      --muted: #999;
-      --accent: #242424;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--background);
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    header {
-      padding: 40px 20px;
-      text-align: center;
-      background-color: var(--surface);
-    }
-
-    header h1 {
-      color: var(--primary);
-      font-size: 36px;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      padding: 15px 0;
-      background-color: #121212;
-    }
-
-    nav a {
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    nav a:hover {
-      color: var(--primary);
-    }
-
-    .section {
-      max-width: 1000px;
-      margin: 60px auto;
-      padding: 0 20px;
-    }
-
-    .section h2 {
-      font-size: 28px;
-      color: var(--primary);
-      margin-bottom: 20px;
-    }
-
-    .service-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    .service-tile {
-      background: var(--accent);
-      border-radius: 10px;
-      padding: 25px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.4);
-      transition: transform 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .service-tile:hover {
-      transform: translateY(-5px);
-    }
-
-    .service-tile h3 {
-      font-size: 20px;
-      color: var(--primary);
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .gallery img {
-      width: 100%;
-      border-radius: 10px;
-      object-fit: cover;
-      aspect-ratio: 16 / 9;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-
-    .contact p {
-      margin-bottom: 10px;
-    }
-
-    .iframe-wrapper {
-      margin-top: 60px;
-      max-width: 1000px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 0 20px 40px;
-      background-color: #111;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      overflow: hidden;
-      text-align: center;
-    }
-
-    .iframe-wrapper h2 {
-      font-size: 24px;
-      margin: 20px;
-      color: var(--primary);
-    }
-
-    .iframe-mask {
-      position: relative;
-      width: 100%;
-      height: 160px;
-      overflow: hidden;
-    }
-
-    .iframe-mask iframe {
-      width: 100%;
-      height: 600px;
-      border: none;
-      margin-top: -210px;
-      transform: scale(1);
-      transform-origin: top center;
-    }
-
-    .iframe-full {
-      width: 100%;
-      height: 600px;
-      border: none;
-      display: none;
-    }
-
-    .iframe-unmask-button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin-top: 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .iframe-unmask-button:hover {
-      background: #1570d0;
-    }
-
-    .vin-search, .compare-section {
-      margin-top: 80px;
-      padding: 20px;
-      background-color: var(--surface);
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .vin-search input, .compare-section input {
-      padding: 10px;
-      font-size: 16px;
-      width: 40%;
-      max-width: 300px;
-      border-radius: 6px;
-      border: 1px solid #444;
-      margin: 10px;
-    }
-
-    .vin-search button, .compare-section button {
-      padding: 10px 16px;
-      font-size: 16px;
-      margin-top: 10px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .vin-search button:hover, .compare-section button:hover {
-      background-color: #1570d0;
-    }
-
-    .compare-iframe-wrapper {
-      display: flex;
-      gap: 20px;
-      margin-top: 20px;
-      justify-content: center;
-    }
-
-    .compare-iframe-wrapper iframe {
-      width: 100%;
-      height: 600px;
-      border: none;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>ავტო-ტუნინგი</h1>
-  </header>
-  <nav>
-    <a href="#services">სერვისები</a>
-    <a href="#gallery">გალერეა</a>
-    <a href="#vin-check">VIN-CODE</a>
-    <a href="#contact">კონტაქტი</a>
-  </nav>
-
-  <section id="services" class="section services">
-    <h2>სერვისები</h2>
-    <div class="service-grid">
-      <div class="service-tile">
-        <h3>🔍 ძრავის სრული დიაგნოსტიკა</h3>
-        <p>პროფესიონალური სკანირება და დეფექტების ანალიზი ISTA-D ტექნოლოგიით.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🚀 Stage 1/2/3 ჩიპტუნინგი</h3>
-        <p>მაქსიმალური შედეგი ტურბინისა და ცხენის ძალის ზრდაში – ინდივიდუალური მიდგომა.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🌡️ ტემპერატურის კონტროლი</h3>
-        <p>წყლისა და ზეთის სისტემების რეგულირება გადახურების თავიდან ასაცილებლად.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🔥 Popcorn & Burble რეჟიმი</h3>
-        <p>სპორტული ხმა მორგებული შენს BMW-ზე — ეფექტური და უსაფრთხო გზით.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🧠 BimmerCode კოდირება</h3>
-        <p>ფუნქციების გააქტიურება, როგორიცაა სარკის დახურვა, განათება და სხვა მალვით.</p>
-      </div>
-      <div class="service-tile">
-        <h3>🔊 ხმის გაუმჯობესება</h3>
-        <p>ხმოვანი ეფექტების გაძლიერება — გლუშიტელის ფიზიკური გადაკეთების გარეშე.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="gallery" class="section">
-    <h2>გალერეა</h2>
-    <div class="gallery">
-      <img src="wp2015598.webp" alt="BMW E92 tuning" />
-      <img src="WhatsAppImage2021-07-13at6.46.58PM_1.webp" alt="BMW დიაგნოსტიკა კაბელით" />
-    </div>
-  </section>
-
-  <section id="iframeSection" class="iframe-wrapper">
-    <h2>startmycar.com</h2>
-    <div class="iframe-mask" id="iframeMasked">
-      <iframe id="startMyCarFrame" src="https://www.startmycar.com/"></iframe>
-    </div>
-    <iframe class="iframe-full" id="iframeUnmasked" src="https://www.startmycar.com/"></iframe>
-    <button class="iframe-unmask-button" onclick="unmaskIframe()">ძიება დასრულდა? იხილე სრულად</button>
-  </section>
-
-  <section class="section vin-search" id="vin-check">
-    <h2>VIN კოდის შემოწმება</h2>
-    <input type="text" id="vinCode" placeholder="შეიყვანე VIN კოდი" />
-    <button onclick="checkVin()">შეამოწმე</button>
-    <div style="margin-top: 20px; display: none;" id="vinResult">
-      <iframe id="vinFrame" width="100%" height="600px" style="border: none;"></iframe>
-    </div>
-  </section>
-
-  <section class="section compare-section">
-    <h2>მანქანების შედარება</h2>
-    <input type="text" id="car1" placeholder="პირველი მანქანა" />
-    <input type="text" id="car2" placeholder="მეორე მანქანა" />
-    <br />
-    <button onclick="compareCars()">შედარება</button>
-    <div class="compare-iframe-wrapper" id="compareResult" style="display:none">
-      <iframe id="carFrame1"></iframe>
-      <iframe id="carFrame2"></iframe>
-    </div>
-  </section>
-
-  <section id="contact" class="section contact">
-    <h2>კონტაქტი</h2>
-    <p>📞 ტელეფონი: +995 598 12 34 56</p>
-    <p>🌍 თბილისი, საქართველო</p>
-    <p>✉️ ელფოსტა: <a href="mailto:tuning@example.com">tuning@example.com</a></p>
-  </section>
-
-  <footer>
-    © 2025 ავტო-ტუნინგი. ყველა უფლება დაცულია.
-  </footer>
-
+  <meta charset="UTF-8">
+  <title>Phone Intelligence Tool</title>
   <script>
-    const iframe = document.getElementById("startMyCarFrame");
-    const initialMarginTop = -210;
-    let scrollEnforced = true;
+    async function lookupPhone() {
+      const number = document.getElementById("phoneNumber").value.trim();
+      const resultDiv = document.getElementById("result");
 
-    const restoreScroll = setInterval(() => {
-      if (!scrollEnforced) return;
-      iframe.style.marginTop = initialMarginTop + "px";
-    }, 500);
+      if (!number) {
+        resultDiv.innerHTML = "\u26a0\ufe0f \u0412веди номер!";
+        return;
+      }
 
-    function unmaskIframe() {
-      document.getElementById("iframeMasked").style.display = "none";
-      document.getElementById("iframeUnmasked").style.display = "block";
-      scrollEnforced = false;
-      clearInterval(restoreScroll);
-    }
+      resultDiv.innerHTML = "\u231b\ufe0f Поиск...";
 
-    function checkVin() {
-      const vin = document.getElementById("vinCode").value.trim();
-      if (!vin) return alert("გთხოვ შეიყვანე VIN კოდი");
-      const result = document.getElementById("vinResult");
-      const frame = document.getElementById("vinFrame");
-      frame.src = `https://www.karmafv.com/autocheck.php?VIN=${encodeURIComponent(vin)}%20&id=780`;
-      result.style.display = "block";
-    }
+      const apiKey = "YOUR_API_KEY_HERE"; // Вставь свой ключ с ipqualityscore.com
+      const url = `https://phonevalidation.ipqualityscore.com/api/json/lookup/${apiKey}/${encodeURIComponent(number)}`;
 
-    function compareCars() {
-      const car1 = document.getElementById("car1").value.trim();
-      const car2 = document.getElementById("car2").value.trim();
-      if (!car1 || !car2) return alert("შეიყვანე ორივე მანქანა");
-      const frame1 = document.getElementById("carFrame1");
-      const frame2 = document.getElementById("carFrame2");
-      frame1.src = `https://www.drom.ru/catalog/?query=${encodeURIComponent(car1)}`;
-      frame2.src = `https://www.drom.ru/catalog/?query=${encodeURIComponent(car2)}`;
-      document.getElementById("compareResult").style.display = "flex";
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!data.valid) {
+          resultDiv.innerHTML = `\u274c \u041dет данных для номера: ${number}`;
+        } else {
+          resultDiv.innerHTML = `
+            <b>\u2705 \u041dайдено:</b><br>
+            Страна: ${data.country_name || 'N/A'}<br>
+            Оператор: ${data.carrier || 'N/A'}<br>
+            Регион: ${data.region || 'N/A'}<br>
+            Тип: ${data.line_type || 'N/A'}<br>
+            Валидный: ${data.valid ? 'Да' : 'Нет'}<br>
+            Предоставляет VoIP: ${data.voip ? 'Да' : 'Нет'}
+          `;
+        }
+      } catch (err) {
+        resultDiv.innerHTML = `\u274c \u041eшибка: ${err.message}`;
+      }
     }
   </script>
+</head>
+<body>
+  <h2>\ud83d\udd0e \u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043d\u043e\u043c\u0435\u0440\u0430</h2>
+  <input type="text" id="phoneNumber" placeholder="+79991112233" style="width: 300px;">
+  <button onclick="lookupPhone()">\u0418\u0441\u043a\u0430\u0442\u044c</button>
+  <div id="result" style="margin-top: 20px; font-family: monospace;"></div>
 </body>
 </html>
