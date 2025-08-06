@@ -1,50 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Phone Intelligence Tool</title>
+  <title>Проверка номера</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #0f0;
+      padding: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      width: 300px;
+    }
+    #result {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔍 Проверка телефонного номера</h2>
+  <input type="text" id="phoneNumber" placeholder="+79991112233">
+  <br>
+  <button onclick="lookupPhone()">Искать</button>
+  <div id="result"></div>
+
   <script>
     async function lookupPhone() {
-      const number = document.getElementById("phoneNumber").value.trim();
-      const resultDiv = document.getElementById("result");
-
-      if (!number) {
-        resultDiv.innerHTML = "\u26a0\ufe0f \u0412веди номер!";
+      const phone = document.getElementById("phoneNumber").value.trim();
+      const result = document.getElementById("result");
+      if (!phone) {
+        result.innerText = "❌ Введите номер!";
         return;
       }
 
-      resultDiv.innerHTML = "\u231b\ufe0f Поиск...";
+      result.innerText = "⌛ Ищу информацию...";
 
-      const apiKey = "YOUR_API_KEY_HERE"; // Вставь свой ключ с ipqualityscore.com
-      const url = `https://phonevalidation.ipqualityscore.com/api/json/lookup/${apiKey}/${encodeURIComponent(number)}`;
+      const apiKey = "YOUR_API_KEY_HERE"; // ← Вставь сюда свой ключ
+      const url = `https://phonevalidation.ipqualityscore.com/api/json/lookup/${apiKey}/${encodeURIComponent(phone)}`;
 
       try {
         const response = await fetch(url);
         const data = await response.json();
 
-        if (!data.valid) {
-          resultDiv.innerHTML = `\u274c \u041dет данных для номера: ${number}`;
-        } else {
-          resultDiv.innerHTML = `
-            <b>\u2705 \u041dайдено:</b><br>
-            Страна: ${data.country_name || 'N/A'}<br>
-            Оператор: ${data.carrier || 'N/A'}<br>
-            Регион: ${data.region || 'N/A'}<br>
-            Тип: ${data.line_type || 'N/A'}<br>
-            Валидный: ${data.valid ? 'Да' : 'Нет'}<br>
-            Предоставляет VoIP: ${data.voip ? 'Да' : 'Нет'}
-          `;
+        if (data.success === false || !data.valid) {
+          result.innerText = `❌ Номер не найден или недействителен.`;
+          return;
         }
+
+        result.innerText = `
+✅ Найдено:
+• Страна: ${data.country_name} (${data.country_code})
+• Оператор: ${data.carrier || 'неизвестен'}
+• Регион: ${data.region || 'неизвестен'}
+• Тип: ${data.line_type || 'неизвестен'}
+• VoIP: ${data.voip ? 'Да' : 'Нет'}
+• Активен: ${data.active_status ? 'Да' : 'Нет'}
+• Формат: ${data.formatting.e164 || 'N/A'}
+        `.trim();
       } catch (err) {
-        resultDiv.innerHTML = `\u274c \u041eшибка: ${err.message}`;
+        result.innerText = `❌ Ошибка запроса: ${err.message}`;
       }
     }
   </script>
-</head>
-<body>
-  <h2>\ud83d\udd0e \u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u043d\u043e\u043c\u0435\u0440\u0430</h2>
-  <input type="text" id="phoneNumber" placeholder="+79991112233" style="width: 300px;">
-  <button onclick="lookupPhone()">\u0418\u0441\u043a\u0430\u0442\u044c</button>
-  <div id="result" style="margin-top: 20px; font-family: monospace;"></div>
 </body>
 </html>
