@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Проверка номера</title>
+  <meta charset="UTF-8" />
+  <title>Проверка грузинского номера</title>
   <style>
     body {
       font-family: monospace;
-      background: #111;
-      color: #0f0;
+      background: #121212;
+      color: #aaffaa;
       padding: 20px;
     }
     input, button {
@@ -15,6 +15,16 @@
       font-size: 16px;
       margin-top: 10px;
       width: 300px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background: #339933;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #22aa22;
     }
     #result {
       margin-top: 20px;
@@ -23,47 +33,55 @@
   </style>
 </head>
 <body>
-  <h2>🔍 Проверка телефонного номера</h2>
-  <input type="text" id="phoneNumber" placeholder="+79991112233">
-  <br>
-  <button onclick="lookupPhone()">Искать</button>
+  <h2>🔍 Проверка грузинского номера (+995)</h2>
+  <input type="text" id="phoneNumber" placeholder="+995599123456" />
+  <br />
+  <button onclick="lookupPhone()">Проверить</button>
   <div id="result"></div>
 
   <script>
     async function lookupPhone() {
       const phone = document.getElementById("phoneNumber").value.trim();
       const result = document.getElementById("result");
-      if (!phone) {
-        result.innerText = "❌ Введите номер!";
+
+      if (!phone.startsWith("+995")) {
+        result.innerText = "❌ Номер должен начинаться с +995";
         return;
       }
 
-      result.innerText = "⌛ Ищу информацию...";
+      if (phone.length < 11 || phone.length > 13) {
+        result.innerText = "❌ Неверный формат номера";
+        return;
+      }
 
-      const apiKey = "YOUR_API_KEY_HERE"; // ← Вставь сюда свой ключ
-      const url = `https://phonevalidation.ipqualityscore.com/api/json/lookup/${apiKey}/${encodeURIComponent(phone)}`;
+      result.innerText = "⌛ Поиск информации...";
+
+      const apiKey = "YOUR_ABSTRACTAPI_KEY_HERE"; // Вставь свой ключ AbstractAPI
+      const url = `https://phonevalidation.abstractapi.com/v1/?api_key=${apiKey}&phone=${encodeURIComponent(phone)}`;
 
       try {
         const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ошибка: ${response.status}`);
+        }
         const data = await response.json();
 
-        if (data.success === false || !data.valid) {
-          result.innerText = `❌ Номер не найден или недействителен.`;
+        if (!data.valid) {
+          result.innerText = "❌ Номер недействителен";
           return;
         }
 
         result.innerText = `
 ✅ Найдено:
-• Страна: ${data.country_name} (${data.country_code})
-• Оператор: ${data.carrier || 'неизвестен'}
-• Регион: ${data.region || 'неизвестен'}
-• Тип: ${data.line_type || 'неизвестен'}
-• VoIP: ${data.voip ? 'Да' : 'Нет'}
-• Активен: ${data.active_status ? 'Да' : 'Нет'}
-• Формат: ${data.formatting.e164 || 'N/A'}
+• Страна: ${data.country?.name || "N/A"}
+• Код страны: ${data.country?.code || "N/A"}
+• Оператор: ${data.carrier || "N/A"}
+• Регион: ${data.location || "N/A"}
+• Тип номера: ${data.line_type || "N/A"}
+• Формат E164: ${data.format?.e164 || "N/A"}
         `.trim();
-      } catch (err) {
-        result.innerText = `❌ Ошибка запроса: ${err.message}`;
+      } catch (error) {
+        result.innerText = `❌ Ошибка запроса: ${error.message}`;
       }
     }
   </script>
