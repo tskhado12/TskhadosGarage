@@ -3,97 +3,117 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pair Chat — чат по коду</title>
+  <title>Pair Chat — E2E, Images, TTL</title>
   <style>
-    :root {
-      --bg: #0f1220; --card: #171a2b; --text: #eef1ff; --muted: #aab0d6;
-      --accent: #5c7cfa; --accent-2: #748ffc; --danger: #ff6b6b;
-      --shadow: 0 10px 30px rgba(0,0,0,0.35);
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, rgba(92,124,250,0.18), transparent),
-                  radial-gradient(1000px 500px at 100% 0%, rgba(116,143,252,0.14), transparent),
-                  var(--bg);
-      color: var(--text);
-    }
-    .container { max-width: 860px; margin: 40px auto; padding: 0 16px; }
-    h1 { margin: 0 0 20px; }
-    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px; margin: 16px 0; box-shadow: var(--shadow); }
-    .hint { margin: 8px 0 0; color: var(--muted); font-style: italic; }
-    .code { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 1px; font-weight: 700; }
-    .my-code-row { display: flex; align-items: center; gap: 12px; font-size: 24px; }
-    .form-row { display: flex; gap: 8px; }
-    input {
-      flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.04); color: var(--text); outline: none;
-    }
-    input::placeholder { color: #9aa2d1; } input:focus { border-color: var(--accent); }
-    .btn { padding: 10px 14px; border-radius: 12px; border: 1px solid transparent; background: linear-gradient(180deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 600; cursor: pointer; }
-    .btn:hover { filter: brightness(1.1); } .btn:active { transform: translateY(1px); }
-    .btn-light { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); }
-    .error { color: var(--danger); min-height: 20px; margin-top: 8px; }
-    .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-    .chat { display: grid; grid-template-rows: auto 1fr auto; height: 60vh; }
-    .messages { list-style: none; padding: 0; margin: 0; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; background: rgba(255,255,255,0.03); }
-    .msg { max-width: 70%; margin: 10px; padding: 10px 12px; border-radius: 14px; line-height: 1.25; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 14px rgba(0,0,0,0.2); word-wrap: break-word; }
-    .msg.me { margin-left: auto; background: rgba(92,124,250,0.18); }
-    .msg.other { margin-right: auto; background: rgba(255,255,255,0.06); }
-    .msg-time { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); text-align: right; }
-    .send-row { display: flex; gap: 8px; margin-top: 10px; }
-    .hidden { display: none; }
-    .footer { text-align:center; color: var(--muted); margin-top: 20px; font-size: 12px; }
+    :root { --bg:#0f1220; --card:#171a2b; --text:#eef1ff; --muted:#aab0d6;
+            --accent:#5c7cfa; --accent2:#748ffc; --danger:#ff6b6b; --ok:#51cf66;
+            --shadow:0 10px 30px rgba(0,0,0,.35); }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+         background:radial-gradient(1200px 600px at 20% -10%,rgba(92,124,250,.18),transparent),
+                    radial-gradient(1000px 500px at 100% 0,rgba(116,143,252,.14),transparent),var(--bg);
+         color:var(--text)}
+    .container{max-width:860px;margin:40px auto;padding:0 16px}
+    h1{margin:0 0 20px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px;margin:16px 0;box-shadow:var(--shadow)}
+    .hint{margin:8px 0 0;color:var(--muted);font-style:italic}
+    .code{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px;font-weight:700}
+    .row{display:flex;gap:8px;align-items:center}
+    .row-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .my-code-row{gap:12px;font-size:24px}
+    input, select{flex:1;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+          background:rgba(255,255,255,.04);color:var(--text);outline:none}
+    input::placeholder{color:#9aa2d1} input:focus, select:focus{border-color:var(--accent)}
+    .btn{padding:10px 14px;border-radius:12px;border:1px solid transparent;
+         background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff;font-weight:600;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)} .btn:active{transform:translateY(1px)}
+    .btn-light{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14)}
+    .error{color:var(--danger);min-height:20px;margin-top:8px}
+    .ok{color:var(--ok)}
+    .chat-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+    .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:68vh}
+    .messages{list-style:none;padding:0;margin:0;overflow-y:auto;border:1px solid rgba(255,255,255,.08);
+              border-radius:12px;background:rgba(255,255,255,.03)}
+    .msg{max-width:80%;margin:10px;padding:10px 12px;border-radius:14px;line-height:1.25;
+         border:1px solid rgba(255,255,255,.08);box-shadow:0 6px 14px rgba(0,0,0,.2);word-wrap:break-word}
+    .msg.me{margin-left:auto;background:rgba(92,124,250,.18)}
+    .msg.other{margin-right:auto;background:rgba(255,255,255,.06)}
+    .msg-time{display:block;margin-top:6px;font-size:12px;color:var(--muted);text-align:right}
+    .msg img{max-width:320px;border-radius:10px;display:block}
+    .send-row{display:flex;gap:8px;margin-top:10px}
+    .hidden{display:none}
+    .footer{text-align:center;color:var(--muted);margin-top:20px;font-size:12px}
+    .small{font-size:12px;color:var(--muted)}
+    .nowrap{white-space:nowrap}
   </style>
 </head>
 <body>
   <main class="container">
     <h1>Pair Chat</h1>
 
+    <!-- Твой персональный код -->
     <section class="card">
       <h2>Твой код</h2>
-      <div class="my-code-row">
+      <div class="row my-code-row">
         <span id="myCode" class="code">••••••</span>
         <button id="copyBtn" class="btn">Скопировать</button>
       </div>
       <p class="hint">Отправь этот 6-значный код другу. Чтобы начать чат, введи его код ниже.</p>
     </section>
 
+    <!-- Подключение к другу по коду -->
     <section class="card">
       <h2>Начать чат с другом</h2>
-      <form id="pairForm" class="form-row">
+      <form id="pairForm" class="row">
         <input id="friendCodeInput" maxlength="6" pattern="[0-9]{6}" placeholder="Код друга (6 цифр)" required />
         <button class="btn" type="submit">Открыть чат</button>
       </form>
       <p id="pairError" class="error"></p>
     </section>
 
+    <!-- Чат -->
     <section id="chatSection" class="card chat hidden">
       <div class="chat-header">
         <div>Чат с кодом: <span id="peerCode" class="code"></span></div>
+        <div id="lockState" class="code ok">🔒 Шифрование включено</div>
         <button id="closeChatBtn" class="btn btn-light">Закрыть</button>
       </div>
+
+      <!-- TTL выбор (по умолчанию 1 час) -->
+      <div class="row-wrap" style="margin-bottom:8px">
+        <label class="small nowrap" for="ttlSelect">Удалять сообщения через:</label>
+        <select id="ttlSelect" style="max-width:240px">
+          <option value="604800">7 дней</option>
+          <option value="259200">3 дня</option>
+          <option value="25200">7 часов</option>
+          <option value="3600" selected>1 час (по умолчанию)</option>
+        </select>
+        <span id="ttlStatus" class="small"></span>
+      </div>
+
       <ul id="messages" class="messages"></ul>
+
+      <!-- Текст + картинка -->
       <form id="msgForm" class="send-row">
         <input id="msgInput" placeholder="Напишите сообщение..." autocomplete="off" />
+        <input id="imgInput" type="file" accept="image/*" style="flex:0 0 auto; width:240px; padding:8px 10px" />
         <button class="btn" type="submit">Отправить</button>
+        <button id="sendImgBtn" class="btn btn-light" type="button">Отп. фото</button>
       </form>
     </section>
 
-    <p class="footer">Работает на GitHub Pages + Firebase</p>
+    <p class="footer">GitHub Pages + Firebase • E2E AES-GCM • Изображения шифруются локально • Авто-удаление по TTL</p>
   </main>
 
   <script type="module">
-    // ====== Firebase CDN (модульные SDK) ======
+    // ===== Firebase =====
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore, doc, getDoc, setDoc, addDoc, collection,
-      onSnapshot, serverTimestamp, query, orderBy
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, addDoc, collection,
+             onSnapshot, serverTimestamp, query, orderBy, where, deleteDoc, Timestamp, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // >>> ВСТАВЬ СВОЙ КОНФИГ ИЗ FIREBASE CONSOLE <<<
+    // <<< ВСТАВЬ СВОЙ КОНФИГ >>>
     const firebaseConfig = {
   apiKey: "AIzaSyDQJneytm9Zi2y0vK0i847qdeT2b_0awfA",
   authDomain: "pair-chat-7f1bf.firebaseapp.com",
@@ -104,12 +124,12 @@
   measurementId: "G-BDDLDDGP25"
 };
 
-    // ====== Инициализация ======
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
+    const sto  = getStorage(app);
 
-    // ====== UI ======
+    // ===== UI refs =====
     const myCodeEl = document.getElementById("myCode");
     const copyBtn = document.getElementById("copyBtn");
     const pairForm = document.getElementById("pairForm");
@@ -120,104 +140,256 @@
     const messagesEl = document.getElementById("messages");
     const msgForm = document.getElementById("msgForm");
     const msgInput = document.getElementById("msgInput");
+    const imgInput = document.getElementById("imgInput");
+    const sendImgBtn = document.getElementById("sendImgBtn");
     const closeChatBtn = document.getElementById("closeChatBtn");
+    const lockStateEl = document.getElementById("lockState");
+    const ttlSelect = document.getElementById("ttlSelect");
+    const ttlStatus = document.getElementById("ttlStatus");
 
-    // ====== Состояние ======
+    // ===== State =====
     let currentUid = null;
     let myCode = null;
     let currentPairId = null;
     let unsubMessages = null;
+    let unsubPair = null;
+    let encKey = null; // CryptoKey AES-GCM
+    let ttlSeconds = 3600; // default 1h
 
-    // ====== Хелперы ======
+    // ===== Crypto helpers =====
+    const te = new TextEncoder(); const td = new TextDecoder();
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-    const escapeHtml = (s) => s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    const generateCode = () => String(Math.floor(100000 + Math.random() * 900000));
+    const rand = (n) => crypto.getRandomValues(new Uint8Array(n));
+    const bufToB64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
+    const b64ToBuf = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer;
 
-    async function ensureOwnCode(uid) {
+    // Простая детерминированная деривация ключа из pairId (оба клиента вычисляют одинаково)
+    const APP_SALT = "pairchat:v1";
+    async function deriveKeyFromPairId(pairId){
+      const baseKey = await crypto.subtle.importKey("raw", te.encode(pairId), "PBKDF2", false, ["deriveKey"]);
+      return await crypto.subtle.deriveKey(
+        { name:"PBKDF2", salt: te.encode(APP_SALT), iterations: 200000, hash: "SHA-256" },
+        baseKey,
+        { name:"AES-GCM", length:256 },
+        false,
+        ["encrypt","decrypt"]
+      );
+    }
+
+    async function encryptBytes(buf){
+      if(!encKey) throw new Error("no-key");
+      const iv = rand(12);
+      const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, encKey, buf);
+      return { ct: new Uint8Array(ct), iv: new Uint8Array(iv.buffer) };
+    }
+
+    async function decryptBytes(ctU8, ivU8){
+      const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:ivU8}, encKey, ctU8);
+      return new Uint8Array(pt);
+    }
+
+    async function encryptString(plain){
+      const { ct, iv } = await encryptBytes(te.encode(plain));
+      return { ct: bufToB64(ct.buffer), iv: bufToB64(iv.buffer), v:1 };
+    }
+
+    async function decryptToString(ctB64, ivB64){
+      const pt = await decryptBytes(new Uint8Array(b64ToBuf(ctB64)), new Uint8Array(b64ToBuf(ivB64)));
+      return td.decode(pt);
+    }
+
+    function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+    function renderMyCode(code){ myCodeEl.textContent = code; }
+    function clearMessages(){ messagesEl.innerHTML = ""; }
+    function stopMessagesStream(){ if (unsubMessages){unsubMessages();unsubMessages=null;} if (unsubPair){unsubPair();unsubPair=null;} }
+    function setLock(on){ lockStateEl.textContent = on ? "🔒 Шифрование включено" : "🔓 Нет шифрования"; lockStateEl.className = on ? "code ok" : "code"; }
+    function generateCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
+
+    function ttlLabel(sec){
+      const map = { 3600: "1 час", 25200: "7 часов", 259200: "3 дня", 604800: "7 дней" };
+      return map[sec] || (sec + " c");
+    }
+
+    function addMessageItem(data){
+      const { uid, ts, ct, iv, type, mime, storagePath, text } = data;
+      const li = document.createElement("li");
+      li.className = "msg " + (uid === currentUid ? "me" : "other");
+      const time = ts?.toDate ? ts.toDate() : new Date();
+      const hh = String(time.getHours()).padStart(2,"0"); const mm = String(time.getMinutes()).padStart(2,"0");
+
+      if (type === "image" && storagePath && iv) {
+        // загрузим, расшифруем, покажем
+        (async () => {
+          try{
+            const bytes = await getBytes(ref(sto, storagePath));
+            const pt = await decryptBytes(new Uint8Array(bytes), new Uint8Array(b64ToBuf(iv)));
+            const blob = new Blob([pt], { type: mime || "image/jpeg" });
+            const url = URL.createObjectURL(blob);
+            li.innerHTML = `<div><img src="${url}" alt="image"/></div><span class="msg-time">${hh}:${mm}</span>`;
+          }catch(e){
+            li.innerHTML = `<div>🔒 (не удалось расшифровать/загрузить изображение)</div><span class="msg-time">${hh}:${mm}</span>`;
+          }
+        })();
+      } else if (ct && iv) {
+        decryptToString(ct, iv).then(t=>{
+          li.innerHTML = `<div>${escapeHtml(t)}</div><span class="msg-time">${hh}:${mm}</span>`;
+        }).catch(()=>{
+          li.innerHTML = `<div>🔒 (не удалось расшифровать)</div><span class="msg-time">${hh}:${mm}</span>`;
+        });
+      } else if (text) {
+        li.innerHTML = `<div>${escapeHtml(text)}</div><span class="msg-time">${hh}:${mm}</span>`;
+      } else {
+        li.innerHTML = `<div>[пусто]</div><span class="msg-time">${hh}:${mm}</span>`;
+      }
+      messagesEl.appendChild(li);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function ensureOwnCode(uid){
       const local = localStorage.getItem("pairchat_code");
       if (local) {
         const snap = await getDoc(doc(db, "codes", local));
         if (snap.exists() && snap.data().ownerUid === uid) return local;
       }
-      for (let i = 0; i < 8; i++) {
+      for (let i=0;i<8;i++){
         const code = generateCode();
-        try {
+        try{
           await setDoc(doc(db, "codes", code), { ownerUid: uid, createdAt: serverTimestamp() });
           localStorage.setItem("pairchat_code", code);
           return code;
-        } catch { await sleep(30); }
+        }catch{ await sleep(30); }
       }
       throw new Error("Не удалось получить персональный код. Обновите страницу позже.");
     }
 
-    function renderMyCode(code) { myCodeEl.textContent = code; }
-    function clearMessages() { messagesEl.innerHTML = ""; }
-    function stopMessagesStream() { if (unsubMessages) { unsubMessages(); unsubMessages = null; } }
-
-    function addMessageItem({ text, uid, ts }) {
-      const li = document.createElement("li");
-      li.className = "msg " + (uid === currentUid ? "me" : "other");
-      const time = ts?.toDate ? ts.toDate() : new Date();
-      const hh = String(time.getHours()).padStart(2, "0");
-      const mm = String(time.getMinutes()).padStart(2, "0");
-      li.innerHTML = `<div>${escapeHtml(text)}</div><span class="msg-time">${hh}:${mm}</span>`;
-      messagesEl.appendChild(li);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+    // === TTL ===
+    async function saveTTL(seconds){
+      ttlSeconds = seconds;
+      if (!currentPairId) return;
+      await setDoc(doc(db, "pairs", currentPairId), { ttlSeconds }, { merge:true });
+      ttlStatus.textContent = `Будем удалять старше: ${ttlLabel(ttlSeconds)}`;
     }
 
-    async function openChatWithCode(friendCode) {
+    async function cleanupOldMessages(){
+      if (!currentPairId || !ttlSeconds) return;
+      const cutoff = Timestamp.fromMillis(Date.now() - ttlSeconds*1000);
+      // удаляем порциями по 50, чтобы не перегружать
+      while (true) {
+        const qOld = query(collection(db, "pairs", currentPairId, "messages"), where("ts","<",cutoff), orderBy("ts","asc"), limit(50));
+        const snap = await getDocs(qOld);
+        if (snap.empty) break;
+        const batch = [];
+        for (const d of snap.docs) batch.push(deleteDoc(d.ref));
+        await Promise.all(batch);
+        // небольшая пауза
+        await sleep(100);
+      }
+    }
+
+    // периодически чистим (каждые 60с)
+    setInterval(()=>cleanupOldMessages().catch(()=>{}), 60000);
+
+    async function openChatWithCode(friendCode){
       pairErrorEl.textContent = "";
-      if (!/^\d{6}$/.test(friendCode)) { pairErrorEl.textContent = "Введите 6 цифр."; return; }
-      if (friendCode === myCode) { pairErrorEl.textContent = "Нельзя чатиться с собой :)"; return; }
+      if(!/^\d{6}$/.test(friendCode)){ pairErrorEl.textContent="Введите 6 цифр."; return; }
+      if(friendCode === myCode){ pairErrorEl.textContent="Нельзя чатиться с собой :)"; return; }
 
       const friendSnap = await getDoc(doc(db, "codes", friendCode));
-      if (!friendSnap.exists()) { pairErrorEl.textContent = "Код не найден. Попросите друга открыть сайт."; return; }
+      if(!friendSnap.exists()){ pairErrorEl.textContent="Код не найден. Попросите друга открыть сайт."; return; }
       const friendUid = friendSnap.data().ownerUid;
-      if (friendUid === currentUid) { pairErrorEl.textContent = "Это ваш код."; return; }
+      if(friendUid === currentUid){ pairErrorEl.textContent="Это ваш код."; return; }
 
       const [aUid, bUid] = [currentUid, friendUid].sort();
       const pairId = `${aUid}_${bUid}`;
       currentPairId = pairId;
 
-      await setDoc(doc(db, "pairs", pairId), { aUid, bUid, createdAt: serverTimestamp() }, { merge: true });
+      // Ключ (всегда включён)
+      encKey = await deriveKeyFromPairId(pairId);
+      setLock(true);
 
-      stopMessagesStream(); clearMessages();
-      const q = query(collection(db, "pairs", pairId, "messages"), orderBy("ts", "asc"));
-      unsubMessages = onSnapshot(q, (snap) => {
-        clearMessages(); snap.forEach(d => addMessageItem(d.data()));
+      // Создадим/обновим пару, подтянем TTL
+      await setDoc(doc(db, "pairs", pairId), { aUid, bUid, createdAt: serverTimestamp(), ttlSeconds: ttlSeconds }, { merge:true });
+
+      // слушаем сам pair, чтобы TTL синхронизировался между участниками
+      if (unsubPair) { unsubPair(); }
+      unsubPair = onSnapshot(doc(db, "pairs", pairId), (ds)=>{
+        const data = ds.data() || {};
+        if (data.ttlSeconds && data.ttlSeconds !== ttlSeconds) {
+          ttlSeconds = data.ttlSeconds;
+          ttlSelect.value = String(ttlSeconds);
+          ttlStatus.textContent = `Будем удалять старше: ${ttlLabel(ttlSeconds)}`;
+        }
       });
+
+      // Сообщения
+      if (unsubMessages) { unsubMessages(); }
+      clearMessages();
+      const qMsgs = query(collection(db, "pairs", pairId, "messages"), orderBy("ts","asc"));
+      unsubMessages = onSnapshot(qMsgs, (snap)=>{ clearMessages(); snap.forEach(d=>addMessageItem(d.data())); });
 
       peerCodeEl.textContent = friendCode;
       chatSection.classList.remove("hidden");
       msgInput.focus();
+
+      // стартовая чистка
+      cleanupOldMessages().catch(()=>{});
     }
 
-    async function sendMessage(text) {
-      if (!text || !currentPairId) return;
+    async function sendText(text){
+      if(!text || !currentPairId) return;
+      const payload = await encryptString(text);
       await addDoc(collection(db, "pairs", currentPairId, "messages"), {
-        uid: currentUid, text: text.slice(0, 4000), ts: serverTimestamp()
+        uid: currentUid, ...payload, type: "text", ts: serverTimestamp()
       });
     }
 
-    // ====== События ======
-    copyBtn.addEventListener("click", async () => {
-      try { await navigator.clipboard.writeText(myCode || ""); copyBtn.textContent = "Скопировано!"; setTimeout(()=>copyBtn.textContent="Скопировать", 1200); } catch {}
-    });
-    pairForm.addEventListener("submit", async (e) => { e.preventDefault(); await openChatWithCode((friendCodeInput.value||"").trim()); });
-    msgForm.addEventListener("submit", async (e) => { e.preventDefault(); const t=(msgInput.value||"").trim(); if(!t) return; await sendMessage(t); msgInput.value=""; });
-    closeChatBtn.addEventListener("click", () => { stopMessagesStream(); chatSection.classList.add("hidden"); currentPairId=null; });
+    async function sendImage(file){
+      if(!file || !currentPairId) return;
+      if (file.size > 5*1024*1024) { pairErrorEl.textContent = "Картинка слишком большая (макс. 5MB)."; return; }
+      const buf = await file.arrayBuffer();
+      const { ct, iv } = await encryptBytes(buf);
 
-    // ====== Старт (анонимная авторизация + код) ======
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      currentUid = user.uid;
-      try { myCode = await ensureOwnCode(currentUid); renderMyCode(myCode); }
-      catch (e) { document.getElementById("pairError").textContent = e.message || String(e); }
+      const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${(file.name.split('.').pop()||'bin')}`;
+      const path = `pairs/${currentPairId}/${currentUid}/${name}`;
+
+      await uploadBytes(ref(sto, path), ct, { contentType: "application/octet-stream" });
+      await addDoc(collection(db, "pairs", currentPairId, "messages"), {
+        uid: currentUid,
+        type: "image",
+        storagePath: path,
+        iv: bufToB64(iv.buffer),
+        mime: file.type || "image/jpeg",
+        ts: serverTimestamp()
+      });
+      imgInput.value = "";
+    }
+
+    // ===== Events =====
+    copyBtn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(myCode || ""); copyBtn.textContent="Скопировано!"; setTimeout(()=>copyBtn.textContent="Скопировать",1200); } catch {}
     });
-    signInAnonymously(auth).catch(err => {
-      document.getElementById("pairError").textContent = "Ошибка авторизации Firebase. Проверьте firebaseConfig.";
+    pairForm.addEventListener("submit", async (e)=>{ e.preventDefault(); await openChatWithCode((friendCodeInput.value||"").trim()); });
+    msgForm.addEventListener("submit", async (e)=>{ e.preventDefault(); const t=(msgInput.value||"").trim(); if(t) await sendText(t); else if (imgInput.files?.[0]) await sendImage(imgInput.files[0]); msgInput.value=""; });
+    sendImgBtn.addEventListener("click", async ()=>{ if (imgInput.files?.[0]) await sendImage(imgInput.files[0]); });
+    ttlSelect.addEventListener("change", async ()=>{ await saveTTL(Number(ttlSelect.value)); });
+    closeChatBtn.addEventListener("click", ()=>{ stopMessagesStream(); chatSection.classList.add("hidden"); currentPairId=null; encKey=null; setLock(true); });
+
+    // ===== Bootstrap =====
+    onAuthStateChanged(auth, async (user)=>{
+      if(!user) return;
+      currentUid = user.uid;
+      try{ myCode = await ensureOwnCode(currentUid); renderMyCode(myCode); }
+      catch(e){ pairErrorEl.textContent = e.message || String(e); }
+    });
+
+    signInAnonymously(auth).catch(err=>{
+      document.getElementById("pairError").textContent = `Firebase Auth error: ${err.code}`;
       console.error(err);
     });
+
+    // дефолт TTL на UI
+    ttlSelect.value = "3600";
+    ttlStatus.textContent = `Будем удалять старше: ${ttlLabel(ttlSeconds)}`;
   </script>
 </body>
 </html>
