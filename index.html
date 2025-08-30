@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <!-- предотвращаем авто-зум на iOS -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Pair Chat — E2E + Images (Firestore) + TTL</title>
   <style>
@@ -18,13 +17,14 @@
         radial-gradient(1200px 600px at 20% -10%,rgba(92,124,250,.18),transparent),
         radial-gradient(1000px 500px at 100% 0,rgba(116,143,252,.14),transparent),
         var(--bg);
-      color:var(--text)
+      color:var(--text);
+      overflow-x:hidden; /* убираем полосу справа */
     }
-    .container{max-width:860px;margin:22px auto;padding:0 12px}
-    h1{margin:0 0 12px}
-    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;margin:10px 0;box-shadow:var(--shadow)}
-    .card.compact{padding:10px;margin:8px 0}
-    .hint{margin:6px 0 0;color:var(--muted);font-style:italic}
+    .container{max-width:860px;margin:14px auto;padding:0 10px}
+    h1{margin:0 0 10px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px;margin:8px 0;box-shadow:var(--shadow);overflow:hidden}
+    .card.compact{padding:10px}
+    .hint{margin:4px 0 0;color:var(--muted);font-style:italic}
     .code{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px;font-weight:700}
     .row{display:flex;gap:8px;align-items:center}
     .row-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -46,9 +46,9 @@
     .error{color:var(--danger);min-height:20px;margin-top:8px}
     .ok{color:var(--ok)}
 
-    .chat-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
-    .chat-actions{display:flex;gap:8px;align-items:center}
-    .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:68vh}
+    .chat-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+    .chat-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:74vh}
     .messages{list-style:none;padding:0;margin:0;overflow-y:auto;border:1px solid rgba(255,255,255,.08);
               border-radius:12px;background:rgba(255,255,255,.03)}
     .msg{max-width:80%;margin:8px;padding:10px 12px;border-radius:14px;line-height:1.25;
@@ -68,10 +68,9 @@
     .nowrap{white-space:nowrap}
 
     @media (max-width: 520px){
-      .container{margin:14px auto;padding:0 10px}
+      .container{margin:12px auto}
       .card.compact h2{margin:0 0 6px;font-size:18px}
       .hint{display:none}
-      .chat{height:74vh}              /* чат выше на телефоне */
       .msg img{max-width:74vw}
       .send-row{flex-direction:column;align-items:stretch;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
       #imgInput{width:100%}
@@ -82,7 +81,6 @@
   <main class="container">
     <h1>Pair Chat</h1>
 
-    <!-- верх делаем компактным -->
     <section class="card compact">
       <h2>Твой код</h2>
       <div class="row my-code-row">
@@ -101,13 +99,12 @@
       <p id="pairError" class="error"></p>
     </section>
 
-    <!-- Чат -->
     <section id="chatSection" class="card chat hidden">
       <div class="chat-header">
         <div>Чат с кодом: <span id="peerCode" class="code"></span></div>
         <div class="chat-actions">
           <div id="lockState" class="code ok">🔒 Шифрование включено</div>
-          <button id="wipeBtn" class="btn btn-danger" title="Удалить все сообщения чата">Стереть всё</button>
+          <button id="wipeBtn" class="btn btn-danger">Стереть всё</button>
           <button id="closeChatBtn" class="btn btn-light">Закрыть</button>
         </div>
       </div>
@@ -183,7 +180,7 @@
     let currentUid = null, myCode = null, currentPairId = null;
     let unsubMessages = null, unsubPair = null;
     let encKey = null;
-    let ttlSeconds = 60; // default 1m
+    let ttlSeconds = 60;
 
     // utils/crypto
     const te = new TextEncoder(), td = new TextDecoder();
@@ -217,62 +214,36 @@
       const pt = await decryptBytes(new Uint8Array(b64ToBuf(ctB64)), new Uint8Array(b64ToBuf(ivB64)));
       return td.decode(pt);
     }
-
     function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
     function renderMyCode(code){ myCodeEl.textContent = code; }
-    function clearMessages(){ messagesEl.innerHTML=""; }
-    function stopStreams(){ if(unsubMessages){unsubMessages();unsubMessages=null;} if(unsubPair){unsubPair();unsubPair=null;} }
-    function setLock(on){ lockStateEl.textContent = on ? "🔒 Шифрование включено" : "🔓 Нет шифрования"; lockStateEl.className = on ? "code ok" : "code"; }
     function generateCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 
-    // ===== Надёжная загрузка + сжатие (WebP→JPEG fallback), цель ~ 290KB =====
-    async function loadImageFromFile(file){
-      if ('createImageBitmap' in window) {
-        try {
-          const bmp = await createImageBitmap(file);
-          return { width:bmp.width, height:bmp.height, draw:(ctx,w,h)=>{ ctx.drawImage(bmp,0,0,w,h); bmp.close(); } };
-        } catch {}
-      }
-      try {
-        const url = URL.createObjectURL(file);
-        const img = new Image(); img.decoding = "async";
-        await new Promise((res,rej)=>{img.onload=res; img.onerror=rej; img.src=url;});
-        return { width:img.width, height:img.height, draw:(ctx,w,h)=>{ ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); } };
-      } catch {}
-      const dataURL = await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>res(fr.result); fr.readAsDataURL(file);});
-      const img2 = new Image(); await new Promise((res,rej)=>{img2.onload=res; img2.onerror=rej; img2.src=dataURL;});
-      return { width:img2.width, height:img2.height, draw:(ctx,w,h)=>ctx.drawImage(img2,0,0,w,h) };
+    // --- Надёжное сжатие для iPhone: всегда JPEG через FileReader ---
+    async function readAsDataURL(file){
+      return await new Promise((res,rej)=>{const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>res(fr.result); fr.readAsDataURL(file);});
     }
-
-    async function canvasToBlobWithFallback(canvas, preferredType, q){
-      const tryType = (type)=>new Promise(res=>canvas.toBlob(res, type, q));
-      let blob = await tryType(preferredType);
-      if (!blob) blob = await tryType('image/jpeg');
-      return { blob, mime: blob ? (preferredType==='image/webp' && blob.type.includes('webp') ? 'image/webp' : (blob.type || 'image/jpeg')) : 'image/jpeg' };
-    }
-
-    async function compressImageAdaptive(file,{
-      targetBytes=290*1024, startMaxW=1600, startMaxH=1600,
-      minMaxW=320, minMaxH=320, startQuality=0.82, minQuality=0.45,
-      preferredType='image/webp'
+    async function compressToJpegBytes(file,{
+      targetBytes=320*1024, startMaxW=1600, startMaxH=1600,
+      minMaxW=320, minMaxH=320, startQuality=0.85, minQuality=0.5
     }={}){
-      const painter = await loadImageFromFile(file);
-      const mk = async (maxW,maxH,q)=>{
-        let {width:w,height:h}=painter;
-        const k=Math.min(1,maxW/w,maxH/h); w=Math.max(1,Math.round(w*k)); h=Math.max(1,Math.round(h*k));
+      const dataURL = await readAsDataURL(file);
+      const img = new Image(); img.decoding="async";
+      await new Promise((res,rej)=>{img.onload=res; img.onerror=rej; img.src=dataURL;});
+      let maxW=startMaxW, maxH=startMaxH, q=startQuality, best=null;
+      const make = async ()=>{
+        let w=img.width, h=img.height, k=Math.min(1,maxW/w,maxH/h);
+        w=Math.max(1,Math.round(w*k)); h=Math.max(1,Math.round(h*k));
         const c=document.createElement('canvas'); c.width=w; c.height=h;
-        const ctx=c.getContext('2d'); painter.draw(ctx,w,h);
-        return await canvasToBlobWithFallback(c, preferredType, q);
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        return await new Promise(res=>c.toBlob(res,'image/jpeg',q));
       };
-      let maxW=startMaxW,maxH=startMaxH,q=startQuality,best=null;
       for(let i=0;i<24;i++){
-        const {blob,mime}=await mk(maxW,maxH,q);
-        if(!best || blob.size<best.blob.size) best={blob,mime};
-        if(blob.size<=targetBytes) return { bytes:new Uint8Array(await blob.arrayBuffer()), mime };
+        const blob = await make(); if(!best || blob.size<best.size) best=blob;
+        if(blob.size<=targetBytes) return { bytes:new Uint8Array(await blob.arrayBuffer()), mime:'image/jpeg' };
         if(q>minQuality) q=Math.max(minQuality,q-0.1);
         else { maxW=Math.max(minMaxW,Math.floor(maxW*0.75)); maxH=Math.max(minMaxH,Math.floor(maxH*0.75)); }
       }
-      return { bytes:new Uint8Array(await best.blob.arrayBuffer()), mime: best.mime };
+      return { bytes:new Uint8Array(await best.arrayBuffer()), mime:'image/jpeg' };
     }
 
     function ttlLabel(sec){
@@ -309,7 +280,9 @@
         li.innerHTML = `<div>[пусто]</div><span class="msg-time">${hh}:${mm}</span>`;
       }
       messagesEl.appendChild(li);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      // автоскрол вниз только если пользователь почти внизу
+      const nearBottom = (messagesEl.scrollTop + messagesEl.clientHeight) >= (messagesEl.scrollHeight - 120);
+      if (nearBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
     async function ensureOwnCode(uid){
@@ -329,7 +302,7 @@
       throw new Error("Не удалось получить персональный код. Обновите страницу позже.");
     }
 
-    // TTL и очистка старых
+    // TTL / очистка
     async function saveTTL(seconds){
       ttlSeconds = seconds;
       if (!currentPairId) return;
@@ -360,7 +333,7 @@
         await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));
       }
       await deleteDoc(doc(db, "pairs", currentPairId));
-      clearMessages();
+      messagesEl.innerHTML="";
       alert("Чат полностью очищен.");
     }
 
@@ -393,9 +366,15 @@
       });
 
       if (unsubMessages) unsubMessages();
-      clearMessages();
+      messagesEl.innerHTML="";
       const qMsgs = query(collection(db, "pairs", currentPairId, "messages"), orderBy("ts","asc"));
-      unsubMessages = onSnapshot(qMsgs, (snap)=>{ clearMessages(); snap.forEach(d=>addMessageItem(d.data())); });
+      // ВАЖНО: не очищаем весь список на каждый снапшот — добавляем только новые
+      unsubMessages = onSnapshot(qMsgs, (snap)=>{
+        snap.docChanges().forEach(ch=>{
+          if (ch.type === "added") addMessageItem(ch.doc.data());
+          // (изменения/удаления нам не нужны для чата)
+        });
+      });
 
       peerCodeEl.textContent = friendCode;
       chatSection.classList.remove("hidden");
@@ -414,19 +393,10 @@
     async function sendImage(file){
       if(!file || !currentPairId) return;
       try{
-        const { bytes, mime } = await compressImageAdaptive(file,{
-          targetBytes:290*1024, startMaxW:1600, startMaxH:1600,
-          minMaxW:320, minMaxH:320, startQuality:0.82, minQuality:0.45,
-          preferredType:'image/webp'
+        const { bytes, mime } = await compressToJpegBytes(file,{
+          targetBytes:320*1024, startMaxW:1600, startMaxH:1600,
+          minMaxW:320, minMaxH:320, startQuality:0.85, minQuality:0.5
         });
-
-        // оценка размера документа (base64≈*4/3) + запас
-        const estB64 = Math.ceil(bytes.byteLength * 4/3) + 200;
-        if (estB64 > 950*1024) {
-          pairErrorEl.textContent = "Картинка слишком большая после сжатия. Попробуйте сделать фото поменьше.";
-          return;
-        }
-
         const { ct, iv } = await encryptBytes(bytes.buffer);
         await addDoc(collection(db, "pairs", currentPairId, "messages"), {
           uid: currentUid, type:"image-inline", mime,
@@ -439,7 +409,7 @@
       }
     }
 
-    // события
+    // events
     copyBtn.addEventListener("click", async ()=>{
       try{ await navigator.clipboard.writeText(myCode || ""); copyBtn.textContent="Скопировано!"; setTimeout(()=>copyBtn.textContent="Скопировать",1100); }catch{}
     });
@@ -460,7 +430,7 @@
 
     ttlSelect.addEventListener("change", async ()=>{ await saveTTL(Number(ttlSelect.value)); });
     wipeBtn.addEventListener("click", async ()=>{ await wipeChatCompletely().catch(err=>alert("Ошибка: "+err.message)); });
-    closeChatBtn.addEventListener("click", ()=>{ stopStreams(); chatSection.classList.add("hidden"); currentPairId=null; encKey=null; setLock(true); });
+    closeChatBtn.addEventListener("click", ()=>{ if(unsubMessages)unsubMessages(); if(unsubPair)unsubPair(); chatSection.classList.add("hidden"); currentPairId=null; encKey=null; });
 
     onAuthStateChanged(auth, async (user)=>{
       if(!user) return;
