@@ -2,17 +2,23 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- предотвращаем авто-зум на iOS и делаем корректный вьюпорт -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Pair Chat — E2E + Images (Firestore) + TTL</title>
   <style>
     :root { --bg:#0f1220; --card:#171a2b; --text:#eef1ff; --muted:#aab0d6;
             --accent:#5c7cfa; --accent2:#748ffc; --danger:#ff6b6b; --ok:#51cf66;
             --shadow:0 10px 30px rgba(0,0,0,.35); }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
-         background:radial-gradient(1200px 600px at 20% -10%,rgba(92,124,250,.18),transparent),
-                    radial-gradient(1000px 500px at 100% 0,rgba(116,143,252,.14),transparent),var(--bg);
-         color:var(--text)}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      -webkit-text-size-adjust:100%;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      background:radial-gradient(1200px 600px at 20% -10%,rgba(92,124,250,.18),transparent),
+                 radial-gradient(1000px 500px at 100% 0,rgba(116,143,252,.14),transparent),var(--bg);
+      color:var(--text)
+    }
     .container{max-width:860px;margin:28px auto;padding:0 12px}
     h1{margin:0 0 14px}
     .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;margin:12px 0;box-shadow:var(--shadow)}
@@ -21,9 +27,16 @@
     .row{display:flex;gap:8px;align-items:center}
     .row-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .my-code-row{gap:12px;font-size:22px}
-    input, select{flex:1;padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-          background:rgba(255,255,255,.04);color:var(--text);outline:none}
-    input::placeholder{color:#9aa2d1} input:focus, select:focus{border-color:var(--accent)}
+    input, select, button{
+      font-size:17px; /* ≥16px — чтобы iOS не зумил при фокусе */
+      line-height:1.2;
+    }
+    input, select{
+      flex:1;padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);color:var(--text);outline:none
+    }
+    input::placeholder{color:#9aa2d1}
+    input:focus, select:focus{border-color:var(--accent)}
     .btn{padding:10px 14px;border-radius:12px;border:1px solid transparent;
          background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff;font-weight:600;cursor:pointer}
     .btn:hover{filter:brightness(1.1)} .btn:active{transform:translateY(1px)}
@@ -33,7 +46,7 @@
     .ok{color:var(--ok)}
     .chat-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
     .chat-actions{display:flex;gap:8px;align-items:center}
-    .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:60vh} /* ниже стало */
+    .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:60vh}
     .messages{list-style:none;padding:0;margin:0;overflow-y:auto;border:1px solid rgba(255,255,255,.08);
               border-radius:12px;background:rgba(255,255,255,.03)}
     .msg{max-width:80%;margin:8px;padding:10px 12px;border-radius:14px;line-height:1.25;
@@ -42,14 +55,14 @@
     .msg.other{margin-right:auto;background:rgba(255,255,255,.06)}
     .msg-time{display:block;margin-top:6px;font-size:12px;color:var(--muted);text-align:right}
     .msg img{max-width:320px;border-radius:10px;display:block}
-    .send-row{display:flex;gap:8px;margin-top:8px;position:sticky;bottom:0;z-index:2;
-              background:rgba(15,18,32,.7);backdrop-filter:blur(6px);padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,.06)}
+    .send-row{
+      display:flex;gap:8px;margin-top:8px;position:sticky;bottom:0;z-index:2;
+      background:rgba(15,18,32,.7);backdrop-filter:blur(6px);padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,.06)
+    }
     .hidden{display:none}
     .footer{text-align:center;color:var(--muted);margin-top:16px;font-size:12px}
     .small{font-size:12px;color:var(--muted)}
     .nowrap{white-space:nowrap}
-
-    /* Мобильная вёрстка */
     @media (max-width: 520px){
       .container{margin:16px auto;padding:0 10px}
       .chat{height:58vh}
@@ -106,7 +119,6 @@
 
       <ul id="messages" class="messages"></ul>
 
-      <!-- одна кнопка: текст и/или фото -->
       <form id="msgForm" class="send-row">
         <input id="msgInput" placeholder="Напишите сообщение..." autocomplete="off" />
         <input id="imgInput" type="file" accept="image/*;capture=camera"
@@ -126,6 +138,7 @@
       onSnapshot, serverTimestamp, query, orderBy, where, deleteDoc, Timestamp, limit, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    // Firebase config (твой)
     const firebaseConfig = {
       apiKey: "AIzaSyDQJneytm9Zi2y0vK0i847qdeT2b_0awfA",
       authDomain: "pair-chat-7f1bf.firebaseapp.com",
@@ -203,34 +216,37 @@
     function setLock(on){ lockStateEl.textContent = on ? "🔒 Шифрование включено" : "🔓 Нет шифрования"; lockStateEl.className = on ? "code ok" : "code"; }
     function generateCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 
-    // === Загрузка изображений, надёжная для телефона (HEIC и т.п.) ===
+    // ===== Картинки: надёжное сжатие с WebP→JPEG fallback =====
     async function loadImageFromFile(file){
-      // 1) createImageBitmap (самый стабильный на iOS 15+)
       if ('createImageBitmap' in window) {
         try {
           const bmp = await createImageBitmap(file);
           return { width:bmp.width, height:bmp.height, draw:(ctx,w,h)=>{ ctx.drawImage(bmp,0,0,w,h); bmp.close(); } };
         } catch {}
       }
-      // 2) обычный <img> + blob URL
       try {
         const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.decoding = "async";
+        const img = new Image(); img.decoding = "async";
         await new Promise((res,rej)=>{img.onload=res; img.onerror=rej; img.src=url;});
         return { width:img.width, height:img.height, draw:(ctx,w,h)=>{ ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); } };
       } catch {}
-      // 3) FileReader dataURL (самый совместимый)
       const dataURL = await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>res(fr.result); fr.readAsDataURL(file);});
-      const img2 = new Image();
-      await new Promise((res,rej)=>{img2.onload=res; img2.onerror=rej; img2.src=dataURL;});
+      const img2 = new Image(); await new Promise((res,rej)=>{img2.onload=res; img2.onerror=rej; img2.src=dataURL;});
       return { width:img2.width, height:img2.height, draw:(ctx,w,h)=>ctx.drawImage(img2,0,0,w,h) };
     }
 
-    // адаптивное сжатие до ≈400KB
+    async function canvasToBlobWithFallback(canvas, preferredType, q){
+      // пробуем предпочитаемый тип; если Safari вернул null — падаем на JPEG
+      const tryType = (type)=>new Promise(res=>canvas.toBlob(res, type, q));
+      let blob = await tryType(preferredType);
+      if (!blob) blob = await tryType('image/jpeg');
+      return { blob, mime: blob ? (preferredType==='image/webp' && blob.type.includes('webp') ? 'image/webp' : blob.type || 'image/jpeg') : 'image/jpeg' };
+    }
+
     async function compressImageAdaptive(file,{
       targetBytes=400*1024, startMaxW=1600, startMaxH=1600,
-      minMaxW=512, minMaxH=512, startQuality=0.85, minQuality=0.5
+      minMaxW=512, minMaxH=512, startQuality=0.85, minQuality=0.5,
+      preferredType='image/webp'
     }={}){
       const painter = await loadImageFromFile(file);
       const mk = async (maxW,maxH,q)=>{
@@ -238,16 +254,16 @@
         const k=Math.min(1,maxW/w,maxH/h); w=Math.max(1,Math.round(w*k)); h=Math.max(1,Math.round(h*k));
         const c=document.createElement('canvas'); c.width=w; c.height=h;
         const ctx=c.getContext('2d'); painter.draw(ctx,w,h);
-        const blob = await new Promise(res=>c.toBlob(res,'image/webp',q));
-        return blob;
+        return await canvasToBlobWithFallback(c, preferredType, q);
       };
       let maxW=startMaxW,maxH=startMaxH,q=startQuality,best=null;
       for(let i=0;i<14;i++){
-        const b=await mk(maxW,maxH,q); if(!best||b.size<best.size) best=b;
-        if(b.size<=targetBytes) return new Uint8Array(await b.arrayBuffer());
+        const {blob,mime}=await mk(maxW,maxH,q);
+        if(!best || blob.size<best.blob.size) best={blob,mime};
+        if(blob.size<=targetBytes) return { bytes:new Uint8Array(await blob.arrayBuffer()), mime };
         if(q>minQuality) q=Math.max(minQuality,q-0.1); else {maxW=Math.max(minMaxW,Math.floor(maxW*0.8)); maxH=Math.max(minMaxH,Math.floor(maxH*0.8));}
       }
-      return new Uint8Array(await best.arrayBuffer());
+      return { bytes:new Uint8Array(await best.blob.arrayBuffer()), mime: best.mime };
     }
 
     function ttlLabel(sec){
@@ -266,7 +282,7 @@
         (async () => {
           try {
             const pt = await decryptBytes(new Uint8Array(b64ToBuf(ct)), new Uint8Array(b64ToBuf(iv)));
-            const url = URL.createObjectURL(new Blob([pt], { type: mime || "image/webp" }));
+            const url = URL.createObjectURL(new Blob([pt], { type: mime || "image/jpeg" }));
             li.innerHTML = `<div><img src="${url}" alt="img"/></div><span class="msg-time">${hh}:${mm}</span>`;
           } catch {
             li.innerHTML = `<div>🔒 (не удалось расшифровать картинку)</div><span class="msg-time">${hh}:${mm}</span>`;
@@ -325,7 +341,6 @@
     }
     setInterval(()=>cleanupOldMessages().catch(()=>{}), 60000);
 
-    // стирание чата
     async function wipeChatCompletely(){
       if(!currentPairId) return;
       if(!confirm("Удалить ВСЕ сообщения этого чата у обоих участников? Отменить нельзя.")) return;
@@ -386,21 +401,23 @@
         uid: currentUid, ...payload, type:"text", ts: serverTimestamp()
       });
     }
+
     async function sendImage(file){
       if(!file || !currentPairId) return;
-      const webp = await compressImageAdaptive(file,{
+      const { bytes, mime } = await compressImageAdaptive(file,{
         targetBytes:400*1024, startMaxW:1600, startMaxH:1600,
-        minMaxW:512, minMaxH:512, startQuality:0.85, minQuality:0.5
+        minMaxW:512, minMaxH:512, startQuality:0.85, minQuality:0.5,
+        preferredType:'image/webp'
       });
-      const { ct, iv } = await encryptBytes(webp.buffer);
+      const { ct, iv } = await encryptBytes(bytes.buffer);
       await addDoc(collection(db, "pairs", currentPairId, "messages"), {
-        uid: currentUid, type:"image-inline", mime:"image/webp",
+        uid: currentUid, type:"image-inline", mime,
         ct: bufToB64(ct.buffer), iv: bufToB64(iv.buffer), ts: serverTimestamp()
       });
       imgInput.value = "";
     }
 
-    // одна кнопка — отправляет текст и/или фото
+    // события
     copyBtn.addEventListener("click", async ()=>{
       try{ await navigator.clipboard.writeText(myCode || ""); copyBtn.textContent="Скопировано!"; setTimeout(()=>copyBtn.textContent="Скопировать",1100); }catch{}
     });
