@@ -71,7 +71,7 @@
       .container{margin:14px auto;padding:0 10px}
       .card.compact h2{margin:0 0 6px;font-size:18px}
       .hint{display:none}
-      .chat{height:74vh}              /* чат выше на телефоне */
+      .chat{height:74vh}
       .msg img{max-width:74vw}
       .send-row{flex-direction:column;align-items:stretch;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
       #imgInput{width:100%}
@@ -225,37 +225,57 @@
     function setLock(on){ lockStateEl.textContent = on ? "🔒 Шифрование включено" : "🔓 Нет шифрования"; lockStateEl.className = on ? "code ok" : "code"; }
     function generateCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 
-    // ===== iPhone-safe JPEG сжатие (FileReader → <img> → canvas), цель ~ 320KB =====
-    async function compressImageAdaptive(file,{
-      targetBytes=320*1024, startMaxW=1600, startMaxH=1600,
-      minMaxW=320, minMaxH=320, startQuality=0.85, minQuality=0.5
-    }={}){
-      // читаем файл
-      const dataURL = await new Promise((res,rej)=>{ const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>res(fr.result); fr.readAsDataURL(file); });
-      const img = new Image(); img.decoding="async";
-      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=dataURL; });
+    /* ===== iPhone-safe JPEG сжатие, без переполнения стека (макс 12 итераций) ===== */
+    async function compressImageAdaptive(file, {
+      targetBytes = 320 * 1024,      // целевой размер ~320KB
+      startMaxW = 1600, startMaxH = 1600,
+      minMaxW = 320,  minMaxH = 320,
+      startQuality = 0.85, minQuality = 0.5
+    } = {}) {
+      // читаем файл в dataURL (стабильно для iOS)
+      const dataURL = await new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onerror = rej;
+        fr.onload = () => res(fr.result);
+        fr.readAsDataURL(file);
+      });
 
-      let maxW=startMaxW, maxH=startMaxH, q=startQuality, best=null;
+      const img = new Image();
+      img.decoding = "async";
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataURL; });
 
-      async function makeBlob(){
-        let w=img.width, h=img.height;
-        const k=Math.min(1, maxW/w, maxH/h);
-        w=Math.max(1, Math.round(w*k)); h=Math.max(1, Math.round(h*k));
-        const c=document.createElement('canvas'); c.width=w; c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        return await new Promise(r=>c.toBlob(r,'image/jpeg',q)); // ТОЛЬКО JPEG
-      }
+      let maxW = startMaxW, maxH = startMaxH, q = startQuality;
+      let bestBlob = null;
 
-      for(let i=0;i<24;i++){
-        const blob=await makeBlob();
-        if(!best || blob.size<best.size) best=blob;
-        if (blob.size<=targetBytes){
-          return { bytes:new Uint8Array(await blob.arrayBuffer()), mime:'image/jpeg' };
+      // ограничиваем число попыток — никакого переполнения стека
+      for (let i = 0; i < 12; i++) {
+        let w = img.width, h = img.height;
+        const k = Math.min(1, maxW / w, maxH / h);
+        w = Math.max(1, Math.round(w * k));
+        h = Math.max(1, Math.round(h * k));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+
+        const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", q)); // ТОЛЬКО JPEG
+        if (!blob) throw new Error("toBlob вернул null");
+
+        if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
+
+        if (blob.size <= targetBytes) {
+          return { bytes: new Uint8Array(await blob.arrayBuffer()), mime: "image/jpeg" };
         }
-        if(q>minQuality) q=Math.max(minQuality, q-0.1);
-        else { maxW=Math.max(minMaxW, Math.floor(maxW*0.75)); maxH=Math.max(minMaxH, Math.floor(maxH*0.75)); }
+
+        if (q > minQuality) q = Math.max(minQuality, q - 0.1);
+        else {
+          maxW = Math.max(minMaxW, Math.floor(maxW * 0.75));
+          maxH = Math.max(minMaxH, Math.floor(maxH * 0.75));
+        }
       }
-      return { bytes:new Uint8Array(await best.arrayBuffer()), mime:'image/jpeg' };
+
+      // fallback: отдать лучшее, что получилось
+      return { bytes: new Uint8Array(await bestBlob.arrayBuffer()), mime: "image/jpeg" };
     }
 
     function ttlLabel(sec){
@@ -292,7 +312,9 @@
         li.innerHTML = `<div>[пусто]</div><span class="msg-time">${hh}:${mm}</span>`;
       }
       messagesEl.appendChild(li);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      const nearBottom = (messagesEl.scrollTop + messagesEl.clientHeight) >= (messagesEl.scrollHeight - 120);
+      if (nearBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
     async function ensureOwnCode(uid){
@@ -376,9 +398,8 @@
       });
 
       if (unsubMessages) unsubMessages();
-      clearMessages(); // ОДИН раз при открытии
+      clearMessages();
       const qMsgs = query(collection(db, "pairs", currentPairId, "messages"), orderBy("ts","asc"));
-      // Добавляем только новые документы — без тотальной очистки (не будет «прыжка»)
       unsubMessages = onSnapshot(qMsgs, (snap)=>{
         snap.docChanges().forEach(ch=>{
           if (ch.type === "added") addMessageItem(ch.doc.data());
@@ -409,7 +430,7 @@
 
         const { ct, iv } = await encryptBytes(bytes.buffer);
         await addDoc(collection(db, "pairs", currentPairId, "messages"), {
-          uid: currentUid, type:"image-inline", mime,            // image/jpeg
+          uid: currentUid, type:"image-inline", mime, // image/jpeg
           ct: bufToB64(ct.buffer), iv: bufToB64(iv.buffer), ts: serverTimestamp()
         });
         imgInput.value = "";
