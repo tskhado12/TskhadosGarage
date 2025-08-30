@@ -28,9 +28,11 @@
          background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff;font-weight:600;cursor:pointer}
     .btn:hover{filter:brightness(1.1)} .btn:active{transform:translateY(1px)}
     .btn-light{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14)}
+    .btn-danger{background:rgba(255,107,107,.18);border-color:rgba(255,107,107,.45);color:#fff}
     .error{color:var(--danger);min-height:20px;margin-top:8px}
     .ok{color:var(--ok)}
     .chat-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+    .chat-actions{display:flex;gap:8px;align-items:center}
     .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:68vh}
     .messages{list-style:none;padding:0;margin:0;overflow-y:auto;border:1px solid rgba(255,255,255,.08);
               border-radius:12px;background:rgba(255,255,255,.03)}
@@ -75,16 +77,19 @@
     <section id="chatSection" class="card chat hidden">
       <div class="chat-header">
         <div>Чат с кодом: <span id="peerCode" class="code"></span></div>
-        <div id="lockState" class="code ok">🔒 Шифрование включено</div>
-        <button id="closeChatBtn" class="btn btn-light">Закрыть</button>
+        <div class="chat-actions">
+          <div id="lockState" class="code ok">🔒 Шифрование включено</div>
+          <button id="wipeBtn" class="btn btn-danger" title="Удалить все сообщения чата">Стереть всё</button>
+          <button id="closeChatBtn" class="btn btn-light">Закрыть</button>
+        </div>
       </div>
 
-      <!-- TTL выбор (дефолт 30 мин) -->
+      <!-- TTL выбор (дефолт: 1 минута) -->
       <div class="row-wrap" style="margin-bottom:8px">
         <label class="small nowrap" for="ttlSelect">Удалять сообщения через:</label>
         <select id="ttlSelect" style="max-width:260px">
-          <option value="60">1 минута</option>
-          <option value="1800" selected>30 минут (по умолчанию)</option>
+          <option value="60" selected>1 минута (по умолчанию)</option>
+          <option value="1800">30 минут</option>
           <option value="3600">1 час</option>
           <option value="25200">7 часов</option>
           <option value="259200">3 дня</option>
@@ -141,6 +146,7 @@
     const msgForm = document.getElementById("msgForm");
     const msgInput = document.getElementById("msgInput");
     const imgInput = document.getElementById("imgInput");
+    const wipeBtn = document.getElementById("wipeBtn");
     const closeChatBtn = document.getElementById("closeChatBtn");
     const lockStateEl = document.getElementById("lockState");
     const ttlSelect = document.getElementById("ttlSelect");
@@ -152,7 +158,7 @@
     let currentPairId = null;
     let unsubMessages = null, unsubPair = null;
     let encKey = null;
-    let ttlSeconds = 1800; // default 30m
+    let ttlSeconds = 60; // default 1m
 
     // utils/crypto
     const te = new TextEncoder(); const td = new TextDecoder();
@@ -291,6 +297,25 @@
     }
     setInterval(()=>cleanupOldMessages().catch(()=>{}), 60000);
 
+    // ПОЛНОЕ СТИРАНИЕ ЧАТА
+    async function wipeChatCompletely(){
+      if(!currentPairId) return;
+      if(!confirm("Удалить ВСЕ сообщения этого чата у обоих участников? Отменить нельзя.")) return;
+
+      // удаляем все сообщения порциями
+      while (true){
+        const qBatch = query(collection(db, "pairs", currentPairId, "messages"), orderBy("ts","asc"), limit(50));
+        const snap = await getDocs(qBatch);
+        if (snap.empty) break;
+        await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));
+      }
+      // удаляем сам документ пары (перестанет существовать чат)
+      await deleteDoc(doc(db, "pairs", currentPairId));
+
+      clearMessages();
+      alert("Чат полностью очищен.");
+    }
+
     async function openChatWithCode(friendCode){
       pairErrorEl.textContent = "";
       if(!/^\d{6}$/.test(friendCode)){ pairErrorEl.textContent="Введите 6 цифр."; return; }
@@ -312,7 +337,7 @@
       if (unsubPair) unsubPair();
       unsubPair = onSnapshot(doc(db, "pairs", currentPairId), (ds)=>{
         const data = ds.data() || {};
-        if (data.ttlSeconds && data.ttlSeconds !== ttlSeconds) {
+        if (data?.ttlSeconds && data.ttlSeconds !== ttlSeconds) {
           ttlSeconds = data.ttlSeconds;
           ttlSelect.value = String(ttlSeconds);
           ttlStatus.textContent = `Будем удалять старше: ${ttlLabel(ttlSeconds)}`;
@@ -364,6 +389,7 @@
       if (f) { await sendImage(f); imgInput.value=""; }
     });
     ttlSelect.addEventListener("change", async ()=>{ await saveTTL(Number(ttlSelect.value)); });
+    wipeBtn.addEventListener("click", async ()=>{ await wipeChatCompletely().catch(err=>alert("Ошибка: "+err.message)); });
     closeChatBtn.addEventListener("click", ()=>{ stopStreams(); chatSection.classList.add("hidden"); currentPairId=null; encKey=null; setLock(true); });
 
     onAuthStateChanged(auth, async (user)=>{
@@ -378,7 +404,7 @@
     });
 
     // дефолт TTL в UI
-    ttlSelect.value = "1800";
+    ttlSelect.value = "60";
     ttlStatus.textContent = `Будем удалять старше: ${ttlLabel(ttlSeconds)}`;
   </script>
 </body>
