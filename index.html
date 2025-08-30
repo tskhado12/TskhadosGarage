@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <!-- предотвращаем авто-зум на iOS и делаем корректный вьюпорт -->
+  <!-- предотвращаем авто-зум на iOS -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Pair Chat — E2E + Images (Firestore) + TTL</title>
   <style>
@@ -12,25 +12,25 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      -webkit-text-size-adjust:100%;
+      margin:0; -webkit-text-size-adjust:100%;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
-      background:radial-gradient(1200px 600px at 20% -10%,rgba(92,124,250,.18),transparent),
-                 radial-gradient(1000px 500px at 100% 0,rgba(116,143,252,.14),transparent),var(--bg);
+      background:
+        radial-gradient(1200px 600px at 20% -10%,rgba(92,124,250,.18),transparent),
+        radial-gradient(1000px 500px at 100% 0,rgba(116,143,252,.14),transparent),
+        var(--bg);
       color:var(--text)
     }
-    .container{max-width:860px;margin:28px auto;padding:0 12px}
-    h1{margin:0 0 14px}
-    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;margin:12px 0;box-shadow:var(--shadow)}
+    .container{max-width:860px;margin:22px auto;padding:0 12px}
+    h1{margin:0 0 12px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;margin:10px 0;box-shadow:var(--shadow)}
+    .card.compact{padding:10px;margin:8px 0}
     .hint{margin:6px 0 0;color:var(--muted);font-style:italic}
     .code{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px;font-weight:700}
     .row{display:flex;gap:8px;align-items:center}
     .row-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .my-code-row{gap:12px;font-size:22px}
-    input, select, button{
-      font-size:17px; /* ≥16px — чтобы iOS не зумил при фокусе */
-      line-height:1.2;
-    }
+
+    input, select, button{font-size:17px; line-height:1.2}
     input, select{
       flex:1;padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.04);color:var(--text);outline:none
@@ -40,13 +40,15 @@
     .btn{padding:10px 14px;border-radius:12px;border:1px solid transparent;
          background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff;font-weight:600;cursor:pointer}
     .btn:hover{filter:brightness(1.1)} .btn:active{transform:translateY(1px)}
+    .btn[disabled]{opacity:.7;cursor:default}
     .btn-light{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14)}
     .btn-danger{background:rgba(255,107,107,.18);border-color:rgba(255,107,107,.45);color:#fff}
     .error{color:var(--danger);min-height:20px;margin-top:8px}
     .ok{color:var(--ok)}
+
     .chat-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
     .chat-actions{display:flex;gap:8px;align-items:center}
-    .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:60vh}
+    .chat{display:grid;grid-template-rows:auto auto 1fr auto;height:68vh}
     .messages{list-style:none;padding:0;margin:0;overflow-y:auto;border:1px solid rgba(255,255,255,.08);
               border-radius:12px;background:rgba(255,255,255,.03)}
     .msg{max-width:80%;margin:8px;padding:10px 12px;border-radius:14px;line-height:1.25;
@@ -54,20 +56,24 @@
     .msg.me{margin-left:auto;background:rgba(92,124,250,.18)}
     .msg.other{margin-right:auto;background:rgba(255,255,255,.06)}
     .msg-time{display:block;margin-top:6px;font-size:12px;color:var(--muted);text-align:right}
-    .msg img{max-width:320px;border-radius:10px;display:block}
+    .msg img{max-width:420px;border-radius:10px;display:block}
     .send-row{
       display:flex;gap:8px;margin-top:8px;position:sticky;bottom:0;z-index:2;
-      background:rgba(15,18,32,.7);backdrop-filter:blur(6px);padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,.06)
+      background:rgba(15,18,32,.7);backdrop-filter:blur(6px);padding:8px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.06)
     }
     .hidden{display:none}
-    .footer{text-align:center;color:var(--muted);margin-top:16px;font-size:12px}
+    .footer{text-align:center;color:var(--muted);margin-top:14px;font-size:12px}
     .small{font-size:12px;color:var(--muted)}
     .nowrap{white-space:nowrap}
+
     @media (max-width: 520px){
-      .container{margin:16px auto;padding:0 10px}
-      .chat{height:58vh}
-      .msg img{max-width:70vw}
-      .send-row{flex-direction:column; align-items:stretch}
+      .container{margin:14px auto;padding:0 10px}
+      .card.compact h2{margin:0 0 6px;font-size:18px}
+      .hint{display:none}
+      .chat{height:74vh}              /* чат выше на телефоне */
+      .msg img{max-width:74vw}
+      .send-row{flex-direction:column;align-items:stretch;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
       #imgInput{width:100%}
     }
   </style>
@@ -76,7 +82,8 @@
   <main class="container">
     <h1>Pair Chat</h1>
 
-    <section class="card">
+    <!-- верх делаем компактным -->
+    <section class="card compact">
       <h2>Твой код</h2>
       <div class="row my-code-row">
         <span id="myCode" class="code">••••••</span>
@@ -85,7 +92,7 @@
       <p class="hint">Отправь этот 6-значный код другу. Чтобы начать чат, введи его код ниже.</p>
     </section>
 
-    <section class="card">
+    <section class="card compact">
       <h2>Начать чат с другом</h2>
       <form id="pairForm" class="row">
         <input id="friendCodeInput" maxlength="6" pattern="[0-9]{6}" placeholder="Код друга (6 цифр)" required />
@@ -94,6 +101,7 @@
       <p id="pairError" class="error"></p>
     </section>
 
+    <!-- Чат -->
     <section id="chatSection" class="card chat hidden">
       <div class="chat-header">
         <div>Чат с кодом: <span id="peerCode" class="code"></span></div>
@@ -122,8 +130,8 @@
       <form id="msgForm" class="send-row">
         <input id="msgInput" placeholder="Напишите сообщение..." autocomplete="off" />
         <input id="imgInput" type="file" accept="image/*;capture=camera"
-               style="flex:0 0 auto; width:240px; padding:8px 10px" />
-        <button class="btn" type="submit">Отправить</button>
+               style="flex:0 0 auto;width:100%;padding:8px 10px" />
+        <button id="sendBtn" class="btn" type="submit">Отправить</button>
       </form>
     </section>
 
@@ -138,7 +146,6 @@
       onSnapshot, serverTimestamp, query, orderBy, where, deleteDoc, Timestamp, limit, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Firebase config (твой)
     const firebaseConfig = {
       apiKey: "AIzaSyDQJneytm9Zi2y0vK0i847qdeT2b_0awfA",
       authDomain: "pair-chat-7f1bf.firebaseapp.com",
@@ -165,6 +172,7 @@
     const msgForm = document.getElementById("msgForm");
     const msgInput = document.getElementById("msgInput");
     const imgInput = document.getElementById("imgInput");
+    const sendBtn = document.getElementById("sendBtn");
     const wipeBtn = document.getElementById("wipeBtn");
     const closeChatBtn = document.getElementById("closeChatBtn");
     const lockStateEl = document.getElementById("lockState");
@@ -209,6 +217,7 @@
       const pt = await decryptBytes(new Uint8Array(b64ToBuf(ctB64)), new Uint8Array(b64ToBuf(ivB64)));
       return td.decode(pt);
     }
+
     function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
     function renderMyCode(code){ myCodeEl.textContent = code; }
     function clearMessages(){ messagesEl.innerHTML=""; }
@@ -216,7 +225,7 @@
     function setLock(on){ lockStateEl.textContent = on ? "🔒 Шифрование включено" : "🔓 Нет шифрования"; lockStateEl.className = on ? "code ok" : "code"; }
     function generateCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 
-    // ===== Картинки: надёжное сжатие с WebP→JPEG fallback =====
+    // ===== Надёжная загрузка + сжатие (WebP→JPEG fallback), цель ~ 290KB =====
     async function loadImageFromFile(file){
       if ('createImageBitmap' in window) {
         try {
@@ -236,16 +245,15 @@
     }
 
     async function canvasToBlobWithFallback(canvas, preferredType, q){
-      // пробуем предпочитаемый тип; если Safari вернул null — падаем на JPEG
       const tryType = (type)=>new Promise(res=>canvas.toBlob(res, type, q));
       let blob = await tryType(preferredType);
       if (!blob) blob = await tryType('image/jpeg');
-      return { blob, mime: blob ? (preferredType==='image/webp' && blob.type.includes('webp') ? 'image/webp' : blob.type || 'image/jpeg') : 'image/jpeg' };
+      return { blob, mime: blob ? (preferredType==='image/webp' && blob.type.includes('webp') ? 'image/webp' : (blob.type || 'image/jpeg')) : 'image/jpeg' };
     }
 
     async function compressImageAdaptive(file,{
-      targetBytes=400*1024, startMaxW=1600, startMaxH=1600,
-      minMaxW=512, minMaxH=512, startQuality=0.85, minQuality=0.5,
+      targetBytes=290*1024, startMaxW=1600, startMaxH=1600,
+      minMaxW=320, minMaxH=320, startQuality=0.82, minQuality=0.45,
       preferredType='image/webp'
     }={}){
       const painter = await loadImageFromFile(file);
@@ -257,11 +265,12 @@
         return await canvasToBlobWithFallback(c, preferredType, q);
       };
       let maxW=startMaxW,maxH=startMaxH,q=startQuality,best=null;
-      for(let i=0;i<14;i++){
+      for(let i=0;i<24;i++){
         const {blob,mime}=await mk(maxW,maxH,q);
         if(!best || blob.size<best.blob.size) best={blob,mime};
         if(blob.size<=targetBytes) return { bytes:new Uint8Array(await blob.arrayBuffer()), mime };
-        if(q>minQuality) q=Math.max(minQuality,q-0.1); else {maxW=Math.max(minMaxW,Math.floor(maxW*0.8)); maxH=Math.max(minMaxH,Math.floor(maxH*0.8));}
+        if(q>minQuality) q=Math.max(minQuality,q-0.1);
+        else { maxW=Math.max(minMaxW,Math.floor(maxW*0.75)); maxH=Math.max(minMaxH,Math.floor(maxH*0.75)); }
       }
       return { bytes:new Uint8Array(await best.blob.arrayBuffer()), mime: best.mime };
     }
@@ -320,7 +329,7 @@
       throw new Error("Не удалось получить персональный код. Обновите страницу позже.");
     }
 
-    // TTL
+    // TTL и очистка старых
     async function saveTTL(seconds){
       ttlSeconds = seconds;
       if (!currentPairId) return;
@@ -404,17 +413,30 @@
 
     async function sendImage(file){
       if(!file || !currentPairId) return;
-      const { bytes, mime } = await compressImageAdaptive(file,{
-        targetBytes:400*1024, startMaxW:1600, startMaxH:1600,
-        minMaxW:512, minMaxH:512, startQuality:0.85, minQuality:0.5,
-        preferredType:'image/webp'
-      });
-      const { ct, iv } = await encryptBytes(bytes.buffer);
-      await addDoc(collection(db, "pairs", currentPairId, "messages"), {
-        uid: currentUid, type:"image-inline", mime,
-        ct: bufToB64(ct.buffer), iv: bufToB64(iv.buffer), ts: serverTimestamp()
-      });
-      imgInput.value = "";
+      try{
+        const { bytes, mime } = await compressImageAdaptive(file,{
+          targetBytes:290*1024, startMaxW:1600, startMaxH:1600,
+          minMaxW:320, minMaxH:320, startQuality:0.82, minQuality:0.45,
+          preferredType:'image/webp'
+        });
+
+        // оценка размера документа (base64≈*4/3) + запас
+        const estB64 = Math.ceil(bytes.byteLength * 4/3) + 200;
+        if (estB64 > 950*1024) {
+          pairErrorEl.textContent = "Картинка слишком большая после сжатия. Попробуйте сделать фото поменьше.";
+          return;
+        }
+
+        const { ct, iv } = await encryptBytes(bytes.buffer);
+        await addDoc(collection(db, "pairs", currentPairId, "messages"), {
+          uid: currentUid, type:"image-inline", mime,
+          ct: bufToB64(ct.buffer), iv: bufToB64(iv.buffer), ts: serverTimestamp()
+        });
+        imgInput.value = "";
+      }catch(err){
+        console.error(err);
+        pairErrorEl.textContent = "Не удалось отправить фото: " + (err.message || err);
+      }
     }
 
     // события
@@ -422,13 +444,20 @@
       try{ await navigator.clipboard.writeText(myCode || ""); copyBtn.textContent="Скопировано!"; setTimeout(()=>copyBtn.textContent="Скопировать",1100); }catch{}
     });
     pairForm.addEventListener("submit", async (e)=>{ e.preventDefault(); await openChatWithCode((friendCodeInput.value||"").trim()); });
+
     msgForm.addEventListener("submit", async (e)=>{
       e.preventDefault();
-      const t = (msgInput.value||"").trim();
-      const f = imgInput.files?.[0];
-      if (t) { await sendText(t); msgInput.value=""; }
-      if (f) { await sendImage(f); imgInput.value=""; }
+      sendBtn.disabled = true; const old = sendBtn.textContent; sendBtn.textContent = "Отправка…";
+      try{
+        const t = (msgInput.value||"").trim();
+        const f = imgInput.files?.[0];
+        if (t) { await sendText(t); msgInput.value=""; }
+        if (f) { await sendImage(f); }
+      } finally {
+        sendBtn.disabled = false; sendBtn.textContent = old;
+      }
     });
+
     ttlSelect.addEventListener("change", async ()=>{ await saveTTL(Number(ttlSelect.value)); });
     wipeBtn.addEventListener("click", async ()=>{ await wipeChatCompletely().catch(err=>alert("Ошибка: "+err.message)); });
     closeChatBtn.addEventListener("click", ()=>{ stopStreams(); chatSection.classList.add("hidden"); currentPairId=null; encKey=null; setLock(true); });
