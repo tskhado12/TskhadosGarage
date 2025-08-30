@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pair Chat — E2E, Images, TTL</title>
+  <title>Pair Chat — E2E + Images (Firestore) + TTL</title>
   <style>
     :root { --bg:#0f1220; --card:#171a2b; --text:#eef1ff; --muted:#aab0d6;
             --accent:#5c7cfa; --accent2:#748ffc; --danger:#ff6b6b; --ok:#51cf66;
@@ -102,16 +102,17 @@
       </form>
     </section>
 
-    <p class="footer">GitHub Pages + Firebase • E2E AES-GCM • Изображения шифруются локально • Авто-удаление по TTL</p>
+    <p class="footer">GitHub Pages + Firebase • E2E AES-GCM • Картинки внутри Firestore • Авто-удаление по TTL</p>
   </main>
 
   <script type="module">
     // ===== Firebase =====
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, addDoc, collection,
-             onSnapshot, serverTimestamp, query, orderBy, where, deleteDoc, Timestamp, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    import {
+      getFirestore, doc, getDoc, setDoc, addDoc, collection,
+      onSnapshot, serverTimestamp, query, orderBy, where, deleteDoc, Timestamp, limit, getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     // <<< ВСТАВЬ СВОЙ КОНФИГ >>>
     const firebaseConfig = {
@@ -127,7 +128,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
-    const sto  = getStorage(app);
 
     // ===== UI refs =====
     const myCodeEl = document.getElementById("myCode");
@@ -163,16 +163,13 @@
     const bufToB64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
     const b64ToBuf = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer;
 
-    // Простая детерминированная деривация ключа из pairId (оба клиента вычисляют одинаково)
+    // Детерминированная деривация ключа из pairId (оба клиента получают одинаковый ключ)
     const APP_SALT = "pairchat:v1";
     async function deriveKeyFromPairId(pairId){
       const baseKey = await crypto.subtle.importKey("raw", te.encode(pairId), "PBKDF2", false, ["deriveKey"]);
       return await crypto.subtle.deriveKey(
         { name:"PBKDF2", salt: te.encode(APP_SALT), iterations: 200000, hash: "SHA-256" },
-        baseKey,
-        { name:"AES-GCM", length:256 },
-        false,
-        ["encrypt","decrypt"]
+        baseKey, { name:"AES-GCM", length:256 }, false, ["encrypt","decrypt"]
       );
     }
 
@@ -201,9 +198,24 @@
     function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
     function renderMyCode(code){ myCodeEl.textContent = code; }
     function clearMessages(){ messagesEl.innerHTML = ""; }
-    function stopMessagesStream(){ if (unsubMessages){unsubMessages();unsubMessages=null;} if (unsubPair){unsubPair();unsubPair=null;} }
+    function stopStreams(){ if (unsubMessages){unsubMessages();unsubMessages=null;} if (unsubPair){unsubPair();unsubPair=null;} }
     function setLock(on){ lockStateEl.textContent = on ? "🔒 Шифрование включено" : "🔓 Нет шифрования"; lockStateEl.className = on ? "code ok" : "code"; }
     function generateCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
+
+    // Сжатие изображения -> WebP -> Uint8Array
+    async function compressImageToWebP(file, maxW = 900, maxH = 900, quality = 0.8) {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+      let { width:w, height:h } = img;
+      const k = Math.min(1, maxW / w, maxH / h);
+      w = Math.round(w * k); h = Math.round(h * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+      const blob = await new Promise(r => c.toBlob(r, 'image/webp', quality));
+      URL.revokeObjectURL(url);
+      return new Uint8Array(await blob.arrayBuffer());
+    }
 
     function ttlLabel(sec){
       const map = { 3600: "1 час", 25200: "7 часов", 259200: "3 дня", 604800: "7 дней" };
@@ -211,23 +223,21 @@
     }
 
     function addMessageItem(data){
-      const { uid, ts, ct, iv, type, mime, storagePath, text } = data;
+      const { uid, ts, ct, iv, type, mime, text } = data;
       const li = document.createElement("li");
       li.className = "msg " + (uid === currentUid ? "me" : "other");
       const time = ts?.toDate ? ts.toDate() : new Date();
       const hh = String(time.getHours()).padStart(2,"0"); const mm = String(time.getMinutes()).padStart(2,"0");
 
-      if (type === "image" && storagePath && iv) {
-        // загрузим, расшифруем, покажем
+      if (type === "image-inline" && ct && iv) {
         (async () => {
-          try{
-            const bytes = await getBytes(ref(sto, storagePath));
-            const pt = await decryptBytes(new Uint8Array(bytes), new Uint8Array(b64ToBuf(iv)));
-            const blob = new Blob([pt], { type: mime || "image/jpeg" });
+          try {
+            const pt = await decryptBytes(new Uint8Array(b64ToBuf(ct)), new Uint8Array(b64ToBuf(iv)));
+            const blob = new Blob([pt], { type: mime || "image/webp" });
             const url = URL.createObjectURL(blob);
-            li.innerHTML = `<div><img src="${url}" alt="image"/></div><span class="msg-time">${hh}:${mm}</span>`;
-          }catch(e){
-            li.innerHTML = `<div>🔒 (не удалось расшифровать/загрузить изображение)</div><span class="msg-time">${hh}:${mm}</span>`;
+            li.innerHTML = `<div><img src="${url}" alt="img"/></div><span class="msg-time">${hh}:${mm}</span>`;
+          } catch {
+            li.innerHTML = `<div>🔒 (не удалось расшифровать картинку)</div><span class="msg-time">${hh}:${mm}</span>`;
           }
         })();
       } else if (ct && iv) {
@@ -273,20 +283,17 @@
     async function cleanupOldMessages(){
       if (!currentPairId || !ttlSeconds) return;
       const cutoff = Timestamp.fromMillis(Date.now() - ttlSeconds*1000);
-      // удаляем порциями по 50, чтобы не перегружать
       while (true) {
-        const qOld = query(collection(db, "pairs", currentPairId, "messages"), where("ts","<",cutoff), orderBy("ts","asc"), limit(50));
+        const qOld = query(
+          collection(db, "pairs", currentPairId, "messages"),
+          where("ts","<",cutoff), orderBy("ts","asc"), limit(50)
+        );
         const snap = await getDocs(qOld);
         if (snap.empty) break;
-        const batch = [];
-        for (const d of snap.docs) batch.push(deleteDoc(d.ref));
-        await Promise.all(batch);
-        // небольшая пауза
+        await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
         await sleep(100);
       }
     }
-
-    // периодически чистим (каждые 60с)
     setInterval(()=>cleanupOldMessages().catch(()=>{}), 60000);
 
     async function openChatWithCode(friendCode){
@@ -303,15 +310,12 @@
       const pairId = `${aUid}_${bUid}`;
       currentPairId = pairId;
 
-      // Ключ (всегда включён)
-      encKey = await deriveKeyFromPairId(pairId);
+      encKey = await deriveKeyFromPairId(pairId); // всегда включено
       setLock(true);
 
-      // Создадим/обновим пару, подтянем TTL
-      await setDoc(doc(db, "pairs", pairId), { aUid, bUid, createdAt: serverTimestamp(), ttlSeconds: ttlSeconds }, { merge:true });
+      await setDoc(doc(db, "pairs", pairId), { aUid, bUid, createdAt: serverTimestamp(), ttlSeconds }, { merge:true });
 
-      // слушаем сам pair, чтобы TTL синхронизировался между участниками
-      if (unsubPair) { unsubPair(); }
+      if (unsubPair) unsubPair();
       unsubPair = onSnapshot(doc(db, "pairs", pairId), (ds)=>{
         const data = ds.data() || {};
         if (data.ttlSeconds && data.ttlSeconds !== ttlSeconds) {
@@ -321,8 +325,7 @@
         }
       });
 
-      // Сообщения
-      if (unsubMessages) { unsubMessages(); }
+      if (unsubMessages) unsubMessages();
       clearMessages();
       const qMsgs = query(collection(db, "pairs", pairId, "messages"), orderBy("ts","asc"));
       unsubMessages = onSnapshot(qMsgs, (snap)=>{ clearMessages(); snap.forEach(d=>addMessageItem(d.data())); });
@@ -330,8 +333,6 @@
       peerCodeEl.textContent = friendCode;
       chatSection.classList.remove("hidden");
       msgInput.focus();
-
-      // стартовая чистка
       cleanupOldMessages().catch(()=>{});
     }
 
@@ -345,20 +346,18 @@
 
     async function sendImage(file){
       if(!file || !currentPairId) return;
-      if (file.size > 5*1024*1024) { pairErrorEl.textContent = "Картинка слишком большая (макс. 5MB)."; return; }
-      const buf = await file.arrayBuffer();
-      const { ct, iv } = await encryptBytes(buf);
-
-      const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${(file.name.split('.').pop()||'bin')}`;
-      const path = `pairs/${currentPairId}/${currentUid}/${name}`;
-
-      await uploadBytes(ref(sto, path), ct, { contentType: "application/octet-stream" });
+      const webpBytes = await compressImageToWebP(file, 900, 900, 0.8);
+      if (webpBytes.byteLength > 400 * 1024) {
+        pairErrorEl.textContent = "Картинка слишком большая после сжатия (лимит ~400KB).";
+        return;
+      }
+      const { ct, iv } = await encryptBytes(webpBytes.buffer);
       await addDoc(collection(db, "pairs", currentPairId, "messages"), {
         uid: currentUid,
-        type: "image",
-        storagePath: path,
+        type: "image-inline",
+        mime: "image/webp",
+        ct: bufToB64(ct.buffer),
         iv: bufToB64(iv.buffer),
-        mime: file.type || "image/jpeg",
         ts: serverTimestamp()
       });
       imgInput.value = "";
@@ -369,10 +368,15 @@
       try { await navigator.clipboard.writeText(myCode || ""); copyBtn.textContent="Скопировано!"; setTimeout(()=>copyBtn.textContent="Скопировать",1200); } catch {}
     });
     pairForm.addEventListener("submit", async (e)=>{ e.preventDefault(); await openChatWithCode((friendCodeInput.value||"").trim()); });
-    msgForm.addEventListener("submit", async (e)=>{ e.preventDefault(); const t=(msgInput.value||"").trim(); if(t) await sendText(t); else if (imgInput.files?.[0]) await sendImage(imgInput.files[0]); msgInput.value=""; });
+    msgForm.addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const t = (msgInput.value||"").trim();
+      if (t) { await sendText(t); msgInput.value=""; }
+      else if (imgInput.files?.[0]) { await sendImage(imgInput.files[0]); }
+    });
     sendImgBtn.addEventListener("click", async ()=>{ if (imgInput.files?.[0]) await sendImage(imgInput.files[0]); });
     ttlSelect.addEventListener("change", async ()=>{ await saveTTL(Number(ttlSelect.value)); });
-    closeChatBtn.addEventListener("click", ()=>{ stopMessagesStream(); chatSection.classList.add("hidden"); currentPairId=null; encKey=null; setLock(true); });
+    closeChatBtn.addEventListener("click", ()=>{ stopStreams(); chatSection.classList.add("hidden"); currentPairId=null; encKey=null; setLock(true); });
 
     // ===== Bootstrap =====
     onAuthStateChanged(auth, async (user)=>{
