@@ -79,14 +79,15 @@
         <button id="closeChatBtn" class="btn btn-light">Закрыть</button>
       </div>
 
-      <!-- TTL выбор (по умолчанию 1 час) -->
+      <!-- TTL выбор (дефолт: 30 минут) -->
       <div class="row-wrap" style="margin-bottom:8px">
         <label class="small nowrap" for="ttlSelect">Удалять сообщения через:</label>
         <select id="ttlSelect" style="max-width:240px">
-          <option value="604800">7 дней</option>
-          <option value="259200">3 дня</option>
+          <option value="1800" selected>30 минут (по умолчанию)</option>
+          <option value="3600">1 час</option>
           <option value="25200">7 часов</option>
-          <option value="3600" selected>1 час (по умолчанию)</option>
+          <option value="259200">3 дня</option>
+          <option value="604800">7 дней</option>
         </select>
         <span id="ttlStatus" class="small"></span>
       </div>
@@ -102,7 +103,7 @@
       </form>
     </section>
 
-    <p class="footer">GitHub Pages + Firebase • E2E AES-GCM • Картинки внутри Firestore • Авто-удаление по TTL</p>
+    <p class="footer">GitHub Pages + Firebase • E2E AES-GCM • Картинки в Firestore • Авто-удаление по TTL</p>
   </main>
 
   <script type="module">
@@ -114,16 +115,16 @@
       onSnapshot, serverTimestamp, query, orderBy, where, deleteDoc, Timestamp, limit, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // <<< ВСТАВЬ СВОЙ КОНФИГ >>>
+    // <<< ТВОЙ КОНФИГ (оставил как ты прислал) >>>
     const firebaseConfig = {
-  apiKey: "AIzaSyDQJneytm9Zi2y0vK0i847qdeT2b_0awfA",
-  authDomain: "pair-chat-7f1bf.firebaseapp.com",
-  projectId: "pair-chat-7f1bf",
-  storageBucket: "pair-chat-7f1bf.firebasestorage.app",
-  messagingSenderId: "685488512637",
-  appId: "1:685488512637:web:cb43fda988190144079b14",
-  measurementId: "G-BDDLDDGP25"
-};
+      apiKey: "AIzaSyDQJneytm9Zi2y0vK0i847qdeT2b_0awfA",
+      authDomain: "pair-chat-7f1bf.firebaseapp.com",
+      projectId: "pair-chat-7f1bf",
+      storageBucket: "pair-chat-7f1bf.firebasestorage.app",
+      messagingSenderId: "685488512637",
+      appId: "1:685488512637:web:cb43fda988190144079b14",
+      measurementId: "G-BDDLDDGP25"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -154,7 +155,7 @@
     let unsubMessages = null;
     let unsubPair = null;
     let encKey = null; // CryptoKey AES-GCM
-    let ttlSeconds = 3600; // default 1h
+    let ttlSeconds = 1800; // default 30m
 
     // ===== Crypto helpers =====
     const te = new TextEncoder(); const td = new TextDecoder();
@@ -163,7 +164,7 @@
     const bufToB64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
     const b64ToBuf = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer;
 
-    // Детерминированная деривация ключа из pairId (оба клиента получают одинаковый ключ)
+    // Ключ из pairId (детерминированно, «всегда включено»)
     const APP_SALT = "pairchat:v1";
     async function deriveKeyFromPairId(pairId){
       const baseKey = await crypto.subtle.importKey("raw", te.encode(pairId), "PBKDF2", false, ["deriveKey"]);
@@ -202,23 +203,47 @@
     function setLock(on){ lockStateEl.textContent = on ? "🔒 Шифрование включено" : "🔓 Нет шифрования"; lockStateEl.className = on ? "code ok" : "code"; }
     function generateCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
 
-    // Сжатие изображения -> WebP -> Uint8Array
-    async function compressImageToWebP(file, maxW = 900, maxH = 900, quality = 0.8) {
-      const img = new Image();
+    // ===== Адаптивное сжатие до ≤ ~400KB (для телефонов тоже) =====
+    async function compressImageAdaptive(file, {
+      targetBytes = 400 * 1024,
+      startMaxW = 1600,
+      startMaxH = 1600,
+      minMaxW = 512,
+      minMaxH = 512,
+      startQuality = 0.85,
+      minQuality = 0.5
+    } = {}) {
+
+      const makeBlob = async (img, maxW, maxH, quality) => {
+        let { width:w, height:h } = img;
+        const k = Math.min(1, maxW / w, maxH / h);
+        w = Math.max(1, Math.round(w * k));
+        h = Math.max(1, Math.round(h * k));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+        return await new Promise(res => c.toBlob(res, 'image/webp', quality));
+      };
+
       const url = URL.createObjectURL(file);
+      const img = new Image();
       await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
-      let { width:w, height:h } = img;
-      const k = Math.min(1, maxW / w, maxH / h);
-      w = Math.round(w * k); h = Math.round(h * k);
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
-      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
-      const blob = await new Promise(r => c.toBlob(r, 'image/webp', quality));
+
+      let maxW = startMaxW, maxH = startMaxH, q = startQuality;
+      let bestBlob = null;
+
+      for (let step = 0; step < 14; step++) {
+        const blob = await makeBlob(img, maxW, maxH, q);
+        if (!bestBlob || blob.size < bestBlob.size) bestBlob = blob;
+        if (blob.size <= targetBytes) { URL.revokeObjectURL(url); return new Uint8Array(await blob.arrayBuffer()); }
+        if (q > minQuality) q = Math.max(minQuality, q - 0.1);
+        else { maxW = Math.max(minMaxW, Math.floor(maxW * 0.8)); maxH = Math.max(minMaxH, Math.floor(maxH * 0.8)); }
+      }
       URL.revokeObjectURL(url);
-      return new Uint8Array(await blob.arrayBuffer());
+      return new Uint8Array(await bestBlob.arrayBuffer());
     }
 
     function ttlLabel(sec){
-      const map = { 3600: "1 час", 25200: "7 часов", 259200: "3 дня", 604800: "7 дней" };
+      const map = { 1800:"30 минут", 3600:"1 час", 25200:"7 часов", 259200:"3 дня", 604800:"7 дней" };
       return map[sec] || (sec + " c");
     }
 
@@ -346,11 +371,15 @@
 
     async function sendImage(file){
       if(!file || !currentPairId) return;
-      const webpBytes = await compressImageToWebP(file, 900, 900, 0.8);
-      if (webpBytes.byteLength > 400 * 1024) {
-        pairErrorEl.textContent = "Картинка слишком большая после сжатия (лимит ~400KB).";
-        return;
-      }
+
+      // адаптивное сжатие до ~400KB (поддерживает большие мобильные фото)
+      const webpBytes = await compressImageAdaptive(file, {
+        targetBytes: 400 * 1024,
+        startMaxW: 1600, startMaxH: 1600,
+        minMaxW: 512,  minMaxH: 512,
+        startQuality: 0.85, minQuality: 0.5
+      });
+
       const { ct, iv } = await encryptBytes(webpBytes.buffer);
       await addDoc(collection(db, "pairs", currentPairId, "messages"), {
         uid: currentUid,
@@ -391,8 +420,8 @@
       console.error(err);
     });
 
-    // дефолт TTL на UI
-    ttlSelect.value = "3600";
+    // дефолт TTL на UI (30 минут)
+    ttlSelect.value = "1800";
     ttlStatus.textContent = `Будем удалять старше: ${ttlLabel(ttlSeconds)}`;
   </script>
 </body>
