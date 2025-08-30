@@ -1,89 +1,222 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Проверка грузинского номера</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pair Chat — чат по коду</title>
   <style>
+    :root {
+      --bg: #0f1220; --card: #171a2b; --text: #eef1ff; --muted: #aab0d6;
+      --accent: #5c7cfa; --accent-2: #748ffc; --danger: #ff6b6b;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: monospace;
-      background: #121212;
-      color: #aaffaa;
-      padding: 20px;
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(92,124,250,0.18), transparent),
+                  radial-gradient(1000px 500px at 100% 0%, rgba(116,143,252,0.14), transparent),
+                  var(--bg);
+      color: var(--text);
     }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-      width: 300px;
-      border-radius: 5px;
-      border: none;
+    .container { max-width: 860px; margin: 40px auto; padding: 0 16px; }
+    h1 { margin: 0 0 20px; }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px; margin: 16px 0; box-shadow: var(--shadow); }
+    .hint { margin: 8px 0 0; color: var(--muted); font-style: italic; }
+    .code { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 1px; font-weight: 700; }
+    .my-code-row { display: flex; align-items: center; gap: 12px; font-size: 24px; }
+    .form-row { display: flex; gap: 8px; }
+    input {
+      flex: 1; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04); color: var(--text); outline: none;
     }
-    button {
-      background: #339933;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #22aa22;
-    }
-    #result {
-      margin-top: 20px;
-      white-space: pre-wrap;
-    }
+    input::placeholder { color: #9aa2d1; } input:focus { border-color: var(--accent); }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1px solid transparent; background: linear-gradient(180deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 600; cursor: pointer; }
+    .btn:hover { filter: brightness(1.1); } .btn:active { transform: translateY(1px); }
+    .btn-light { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.14); }
+    .error { color: var(--danger); min-height: 20px; margin-top: 8px; }
+    .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .chat { display: grid; grid-template-rows: auto 1fr auto; height: 60vh; }
+    .messages { list-style: none; padding: 0; margin: 0; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; background: rgba(255,255,255,0.03); }
+    .msg { max-width: 70%; margin: 10px; padding: 10px 12px; border-radius: 14px; line-height: 1.25; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 6px 14px rgba(0,0,0,0.2); word-wrap: break-word; }
+    .msg.me { margin-left: auto; background: rgba(92,124,250,0.18); }
+    .msg.other { margin-right: auto; background: rgba(255,255,255,0.06); }
+    .msg-time { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); text-align: right; }
+    .send-row { display: flex; gap: 8px; margin-top: 10px; }
+    .hidden { display: none; }
+    .footer { text-align:center; color: var(--muted); margin-top: 20px; font-size: 12px; }
   </style>
 </head>
 <body>
-  <h2>🔍 Проверка грузинского номера (+995)</h2>
-  <input type="text" id="phoneNumber" placeholder="+995599123456" />
-  <br />
-  <button onclick="lookupPhone()">Проверить</button>
-  <div id="result"></div>
+  <main class="container">
+    <h1>Pair Chat</h1>
 
-  <script>
-    async function lookupPhone() {
-      const phone = document.getElementById("phoneNumber").value.trim();
-      const result = document.getElementById("result");
+    <section class="card">
+      <h2>Твой код</h2>
+      <div class="my-code-row">
+        <span id="myCode" class="code">••••••</span>
+        <button id="copyBtn" class="btn">Скопировать</button>
+      </div>
+      <p class="hint">Отправь этот 6-значный код другу. Чтобы начать чат, введи его код ниже.</p>
+    </section>
 
-      if (!phone.startsWith("+995")) {
-        result.innerText = "❌ Номер должен начинаться с +995";
-        return;
+    <section class="card">
+      <h2>Начать чат с другом</h2>
+      <form id="pairForm" class="form-row">
+        <input id="friendCodeInput" maxlength="6" pattern="[0-9]{6}" placeholder="Код друга (6 цифр)" required />
+        <button class="btn" type="submit">Открыть чат</button>
+      </form>
+      <p id="pairError" class="error"></p>
+    </section>
+
+    <section id="chatSection" class="card chat hidden">
+      <div class="chat-header">
+        <div>Чат с кодом: <span id="peerCode" class="code"></span></div>
+        <button id="closeChatBtn" class="btn btn-light">Закрыть</button>
+      </div>
+      <ul id="messages" class="messages"></ul>
+      <form id="msgForm" class="send-row">
+        <input id="msgInput" placeholder="Напишите сообщение..." autocomplete="off" />
+        <button class="btn" type="submit">Отправить</button>
+      </form>
+    </section>
+
+    <p class="footer">Работает на GitHub Pages + Firebase</p>
+  </main>
+
+  <script type="module">
+    // ====== Firebase CDN (модульные SDK) ======
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, doc, getDoc, setDoc, addDoc, collection,
+      onSnapshot, serverTimestamp, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // >>> ВСТАВЬ СВОЙ КОНФИГ ИЗ FIREBASE CONSOLE <<<
+    const firebaseConfig = {
+      apiKey: "PASTE_YOURS",
+      authDomain: "PASTE_YOURS.firebaseapp.com",
+      projectId: "PASTE_YOURS",
+      storageBucket: "PASTE_YOURS.appspot.com",
+      messagingSenderId: "PASTE_YOURS",
+      appId: "PASTE_YOURS"
+    };
+
+    // ====== Инициализация ======
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    // ====== UI ======
+    const myCodeEl = document.getElementById("myCode");
+    const copyBtn = document.getElementById("copyBtn");
+    const pairForm = document.getElementById("pairForm");
+    const friendCodeInput = document.getElementById("friendCodeInput");
+    const pairErrorEl = document.getElementById("pairError");
+    const chatSection = document.getElementById("chatSection");
+    const peerCodeEl = document.getElementById("peerCode");
+    const messagesEl = document.getElementById("messages");
+    const msgForm = document.getElementById("msgForm");
+    const msgInput = document.getElementById("msgInput");
+    const closeChatBtn = document.getElementById("closeChatBtn");
+
+    // ====== Состояние ======
+    let currentUid = null;
+    let myCode = null;
+    let currentPairId = null;
+    let unsubMessages = null;
+
+    // ====== Хелперы ======
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const escapeHtml = (s) => s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    const generateCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
+    async function ensureOwnCode(uid) {
+      const local = localStorage.getItem("pairchat_code");
+      if (local) {
+        const snap = await getDoc(doc(db, "codes", local));
+        if (snap.exists() && snap.data().ownerUid === uid) return local;
       }
-
-      if (phone.length < 11 || phone.length > 13) {
-        result.innerText = "❌ Неверный формат номера";
-        return;
+      for (let i = 0; i < 8; i++) {
+        const code = generateCode();
+        try {
+          await setDoc(doc(db, "codes", code), { ownerUid: uid, createdAt: serverTimestamp() });
+          localStorage.setItem("pairchat_code", code);
+          return code;
+        } catch { await sleep(30); }
       }
-
-      result.innerText = "⌛ Поиск информации...";
-
-      const apiKey = "c079cb4303484c0487d96de030f8c52a"; // Вставь свой ключ AbstractAPI
-      const url = `https://phonevalidation.abstractapi.com/v1/?api_key=${apiKey}&phone=${encodeURIComponent(phone)}`;
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`HTTP ошибка: ${response.status}`);
-        }
-        const data = await response.json();
-
-        if (!data.valid) {
-          result.innerText = "❌ Номер недействителен";
-          return;
-        }
-
-        result.innerText = `
-✅ Найдено:
-• Страна: ${data.country?.name || "N/A"}
-• Код страны: ${data.country?.code || "N/A"}
-• Оператор: ${data.carrier || "N/A"}
-• Регион: ${data.location || "N/A"}
-• Тип номера: ${data.line_type || "N/A"}
-• Формат E164: ${data.format?.e164 || "N/A"}
-        `.trim();
-      } catch (error) {
-        result.innerText = `❌ Ошибка запроса: ${error.message}`;
-      }
+      throw new Error("Не удалось получить персональный код. Обновите страницу позже.");
     }
+
+    function renderMyCode(code) { myCodeEl.textContent = code; }
+    function clearMessages() { messagesEl.innerHTML = ""; }
+    function stopMessagesStream() { if (unsubMessages) { unsubMessages(); unsubMessages = null; } }
+
+    function addMessageItem({ text, uid, ts }) {
+      const li = document.createElement("li");
+      li.className = "msg " + (uid === currentUid ? "me" : "other");
+      const time = ts?.toDate ? ts.toDate() : new Date();
+      const hh = String(time.getHours()).padStart(2, "0");
+      const mm = String(time.getMinutes()).padStart(2, "0");
+      li.innerHTML = `<div>${escapeHtml(text)}</div><span class="msg-time">${hh}:${mm}</span>`;
+      messagesEl.appendChild(li);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function openChatWithCode(friendCode) {
+      pairErrorEl.textContent = "";
+      if (!/^\d{6}$/.test(friendCode)) { pairErrorEl.textContent = "Введите 6 цифр."; return; }
+      if (friendCode === myCode) { pairErrorEl.textContent = "Нельзя чатиться с собой :)"; return; }
+
+      const friendSnap = await getDoc(doc(db, "codes", friendCode));
+      if (!friendSnap.exists()) { pairErrorEl.textContent = "Код не найден. Попросите друга открыть сайт."; return; }
+      const friendUid = friendSnap.data().ownerUid;
+      if (friendUid === currentUid) { pairErrorEl.textContent = "Это ваш код."; return; }
+
+      const [aUid, bUid] = [currentUid, friendUid].sort();
+      const pairId = `${aUid}_${bUid}`;
+      currentPairId = pairId;
+
+      await setDoc(doc(db, "pairs", pairId), { aUid, bUid, createdAt: serverTimestamp() }, { merge: true });
+
+      stopMessagesStream(); clearMessages();
+      const q = query(collection(db, "pairs", pairId, "messages"), orderBy("ts", "asc"));
+      unsubMessages = onSnapshot(q, (snap) => {
+        clearMessages(); snap.forEach(d => addMessageItem(d.data()));
+      });
+
+      peerCodeEl.textContent = friendCode;
+      chatSection.classList.remove("hidden");
+      msgInput.focus();
+    }
+
+    async function sendMessage(text) {
+      if (!text || !currentPairId) return;
+      await addDoc(collection(db, "pairs", currentPairId, "messages"), {
+        uid: currentUid, text: text.slice(0, 4000), ts: serverTimestamp()
+      });
+    }
+
+    // ====== События ======
+    copyBtn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(myCode || ""); copyBtn.textContent = "Скопировано!"; setTimeout(()=>copyBtn.textContent="Скопировать", 1200); } catch {}
+    });
+    pairForm.addEventListener("submit", async (e) => { e.preventDefault(); await openChatWithCode((friendCodeInput.value||"").trim()); });
+    msgForm.addEventListener("submit", async (e) => { e.preventDefault(); const t=(msgInput.value||"").trim(); if(!t) return; await sendMessage(t); msgInput.value=""; });
+    closeChatBtn.addEventListener("click", () => { stopMessagesStream(); chatSection.classList.add("hidden"); currentPairId=null; });
+
+    // ====== Старт (анонимная авторизация + код) ======
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      currentUid = user.uid;
+      try { myCode = await ensureOwnCode(currentUid); renderMyCode(myCode); }
+      catch (e) { document.getElementById("pairError").textContent = e.message || String(e); }
+    });
+    signInAnonymously(auth).catch(err => {
+      document.getElementById("pairError").textContent = "Ошибка авторизации Firebase. Проверьте firebaseConfig.";
+      console.error(err);
+    });
   </script>
 </body>
 </html>
