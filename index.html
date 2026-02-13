@@ -237,11 +237,27 @@
       from{ transform: translateY(120vh) translateX(0); }
       to{ transform: translateY(-20vh) translateX(40px); }
     }
+    .together{
+  position: fixed;
+  top: 14px;
+  left: 14px;   /* хочешь справа — замени на right:14px; и удали left */
+  z-index: 999999;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  color: rgba(255,255,255,.92);
+  font-weight: 800;
+  font-size: 13px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.25);
+}
   </style>
 </head>
 
 <body>
   <div class="wrap">
+    <div class="together" id="together">ერთად ვართ: …</div>
     <div class="hearts" id="hearts"></div>
 
     <!-- Экран 1 -->
@@ -527,6 +543,58 @@
       openModal(content[key].title, content[key].html);
     });
   });
+  const startDate = new Date(2024, 4, 26, 0, 0, 0); // 26 мая 2024 (месяц 0=янв, 4=май)
+const togetherEl = document.getElementById("together");
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function daysInMonth(y, m){ return new Date(y, m + 1, 0).getDate(); }
+
+function diffYMDHMS(from, to){
+  // копии дат
+  let y = to.getFullYear() - from.getFullYear();
+  let mo = to.getMonth() - from.getMonth();
+  let d = to.getDate() - from.getDate();
+  let h = to.getHours() - from.getHours();
+  let mi = to.getMinutes() - from.getMinutes();
+  let s = to.getSeconds() - from.getSeconds();
+
+  if (s < 0){ s += 60; mi -= 1; }
+  if (mi < 0){ mi += 60; h -= 1; }
+  if (h < 0){ h += 24; d -= 1; }
+
+  if (d < 0){
+    // берём дни из предыдущего месяца относительно даты "to"
+    let pm = to.getMonth() - 1;
+    let py = to.getFullYear();
+    if (pm < 0){ pm = 11; py -= 1; }
+    d += daysInMonth(py, pm);
+    mo -= 1;
+  }
+
+  if (mo < 0){ mo += 12; y -= 1; }
+  if (y < 0) y = 0;
+
+  return { y, mo, d, h, mi, s };
+}
+
+function updateTogether(){
+  const now = new Date();
+  let from = startDate;
+  let to = now;
+
+  if (to < from){
+    togetherEl.textContent = "Мы вместе: 0 лет 0 мес 0 дн 00:00:00";
+    return;
+  }
+
+  const t = diffYMDHMS(from, to);
+
+  togetherEl.textContent =
+    `Мы вместе: ${t.y} г ${t.mo} мес ${t.d} дн ${pad2(t.h)}:${pad2(t.mi)}:${pad2(t.s)}`;
+}
+
+updateTogether();
+setInterval(updateTogether, 1000);
 </script>
 </body>
 </html>
