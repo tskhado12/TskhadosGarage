@@ -356,17 +356,80 @@
 
   // ====== "Нет" убегает ======
   function moveNoButton(){
-    const pad = 10;
-    const btnRect = noBtn.getBoundingClientRect();
-    const maxX = window.innerWidth - btnRect.width - pad;
-    const maxY = window.innerHeight - btnRect.height - pad;
+    // ====== "Нет" спавнится заново (всегда в пределах экрана) ======
+const noBtn = document.getElementById("noBtn");
 
-    // ставим абсолют и переносим в body-координаты
-    noBtn.style.position = "fixed";
-    noBtn.style.left = Math.max(pad, Math.random()*maxX) + "px";
-    noBtn.style.top  = Math.max(pad, Math.random()*maxY) + "px";
-    noBtn.style.zIndex = 20;
-    noBtn.style.transform = "translateZ(0)";
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function spawnNoButton() {
+  const pad = 12;
+
+  // делаем fixed, чтобы позиционировать по экрану
+  noBtn.style.position = "fixed";
+  noBtn.style.zIndex = 9999;
+
+  const w = noBtn.offsetWidth || 160;
+  const h = noBtn.offsetHeight || 44;
+
+  const maxX = window.innerWidth - w - pad;
+  const maxY = window.innerHeight - h - pad;
+
+  // 4 зоны: TOP / BOTTOM / LEFT / RIGHT (чтоб реально “сверху/снизу”)
+  const zone = Math.floor(Math.random() * 4);
+
+  let x, y;
+
+  if (zone === 0) { // TOP
+    x = pad + Math.random() * maxX;
+    y = pad + Math.random() * 80;
+  } else if (zone === 1) { // BOTTOM
+    x = pad + Math.random() * maxX;
+    y = maxY - Math.random() * 80;
+  } else if (zone === 2) { // LEFT
+    x = pad + Math.random() * 80;
+    y = pad + Math.random() * maxY;
+  } else { // RIGHT
+    x = maxX - Math.random() * 80;
+    y = pad + Math.random() * maxY;
+  }
+
+  x = clamp(x, pad, maxX);
+  y = clamp(y, pad, maxY);
+
+  noBtn.style.left = x + "px";
+  noBtn.style.top  = y + "px";
+
+  // микро-анимация (опционально, но красиво)
+  noBtn.animate(
+    [{ transform: "scale(0.96)" }, { transform: "scale(1)" }],
+    { duration: 120, easing: "ease-out" }
+  );
+}
+
+// важно: чтобы клик НЕ “убивал” кнопку и не срабатывали другие действия
+noBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  spawnNoButton();
+});
+
+// на iPhone лучше реагировать ещё и на touchstart
+noBtn.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  spawnNoButton();
+}, { passive: false });
+
+// если хочешь, чтобы он убегал даже при наведении мышкой на ПК:
+noBtn.addEventListener("mouseenter", spawnNoButton);
+
+// при повороте экрана/ресайзе — пересчитать позицию, чтобы не “пропал”
+window.addEventListener("resize", () => {
+  // если кнопка уже фиксированная, просто переспавним
+  if (getComputedStyle(noBtn).position === "fixed") spawnNoButton();
+});
   }
 
   // для ПК + телефонов
