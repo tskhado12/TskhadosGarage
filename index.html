@@ -49,7 +49,8 @@
       padding:22px;
       backdrop-filter: blur(10px);
       position:relative;
-      overflow:hidden;
+      /* ВАЖНО: пусть карточка не режет элементы (на всякий случай) */
+      overflow: visible;
     }
     .card::before{
       content:"";
@@ -101,12 +102,19 @@
     }
     .btn-yes:hover{ filter:brightness(1.05); transform: translateY(-1px); }
 
-    .btn-no{
+    /* Плавающая кнопка НЕТ */
+    .btn-no-float{
       background: rgba(255,255,255,.10);
       color:var(--text);
       border:1px solid rgba(255,255,255,.18);
-      flex:1 1 160px;
-      position:relative;
+      position:fixed;
+      left: 20px;
+      top: 20px;
+      z-index: 999999;
+      min-width: 160px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+      display:none; /* показываем только на первом экране */
     }
 
     .grid{
@@ -192,9 +200,7 @@
       border-radius: 12px;
       font-weight:900;
     }
-    .modal-body{
-      padding:16px;
-    }
+    .modal-body{ padding:16px; }
     .photos{
       display:grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
@@ -207,18 +213,13 @@
       border-radius: 16px;
       border:1px solid rgba(255,255,255,.14);
     }
-
     .letter{
       white-space:pre-wrap;
       line-height:1.55;
       color:var(--text);
       font-weight:650;
     }
-
-    audio{
-      width:100%;
-      margin-top:8px;
-    }
+    audio{ width:100%; margin-top:8px; }
 
     .hearts{
       position:absolute; inset:0;
@@ -249,9 +250,9 @@
       <h1 id="title">Привет 💖</h1>
       <p>Хочешь посмотреть свой подарок на 14 февраля?</p>
 
+      <!-- Тут только ДА -->
       <div class="row">
         <button class="btn-yes" id="yesBtn">ДА</button>
-        <button class="btn-no" id="noBtn">НЕТ</button>
       </div>
 
       <p style="margin-top:14px; font-size:12px; color:rgba(255,255,255,.55)">
@@ -316,15 +317,17 @@
     </div>
   </div>
 
+  <!-- ПЛАВАЮЩИЙ НЕТ (вне карточки!) -->
+  <button class="btn-no-float" id="noFloat">НЕТ</button>
+
 <script>
-  // ====== Персонализация по имени из ссылки ======
-  // Пример: https://username.github.io/repo/?name=Anastasia
+  // ====== имя из ?name= ======
   const params = new URLSearchParams(location.search);
   const name = params.get("name");
   const title = document.getElementById("title");
   if (name && name.trim()) title.textContent = `Привет, ${name.trim()} 💖`;
 
-  // ====== Сердечки на фоне ======
+  // ====== сердечки ======
   const hearts = document.getElementById("hearts");
   const heartEmojis = ["💗","💖","💘","💕","💞"];
   for (let i=0;i<18;i++){
@@ -338,92 +341,92 @@
     hearts.appendChild(s);
   }
 
-  // ====== Экраны ======
+  // ====== экраны ======
   const screen1 = document.getElementById("screen1");
   const screen2 = document.getElementById("screen2");
   const yesBtn = document.getElementById("yesBtn");
-  const noBtn = document.getElementById("noBtn");
   const backToStart = document.getElementById("backToStart");
+
+  // плавающий НЕТ
+  const noFloat = document.getElementById("noFloat");
+  noFloat.style.display = "block";
 
   yesBtn.addEventListener("click", () => {
     screen1.classList.add("hidden");
     screen2.classList.remove("hidden");
+    noFloat.style.display = "none"; // на меню подарков НЕТ не нужен
   });
 
   backToStart.addEventListener("click", () => {
     screen2.classList.add("hidden");
     screen1.classList.remove("hidden");
+    noFloat.style.display = "block";
+    spawnNo(); // чтоб сразу появился в норм месте
   });
 
-  // ====== "НЕТ" всегда переспавнивается и не исчезает ======
-  function clamp(n, min, max) {
-    return Math.max(min, Math.min(max, n));
-  }
+  // ====== НЕТ спавнится по краям и не исчезает ======
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
-  function spawnNoButton() {
+  function spawnNo(){
     const pad = 12;
-
-    noBtn.style.position = "fixed";
-    noBtn.style.zIndex = 9999;
-
-    const w = noBtn.offsetWidth || 160;
-    const h = noBtn.offsetHeight || 44;
+    const w = noFloat.offsetWidth || 160;
+    const h = noFloat.offsetHeight || 44;
 
     const maxX = window.innerWidth - w - pad;
     const maxY = window.innerHeight - h - pad;
 
-    const zone = Math.floor(Math.random() * 4); // 0 top,1 bottom,2 left,3 right
-    let x, y;
+    // зоны (реально сверху/снизу/слева/справа)
+    const zone = Math.floor(Math.random()*4);
+    let x=pad, y=pad;
 
-    if (zone === 0) { // TOP
-      x = pad + Math.random() * maxX;
-      y = pad + Math.random() * 80;
-    } else if (zone === 1) { // BOTTOM
-      x = pad + Math.random() * maxX;
-      y = maxY - Math.random() * 80;
-    } else if (zone === 2) { // LEFT
-      x = pad + Math.random() * 80;
-      y = pad + Math.random() * maxY;
+    if(zone===0){ // TOP
+      x = pad + Math.random()*maxX;
+      y = pad + Math.random()*90;
+    } else if(zone===1){ // BOTTOM
+      x = pad + Math.random()*maxX;
+      y = maxY - Math.random()*90;
+    } else if(zone===2){ // LEFT
+      x = pad + Math.random()*90;
+      y = pad + Math.random()*maxY;
     } else { // RIGHT
-      x = maxX - Math.random() * 80;
-      y = pad + Math.random() * maxY;
+      x = maxX - Math.random()*90;
+      y = pad + Math.random()*maxY;
     }
 
     x = clamp(x, pad, maxX);
     y = clamp(y, pad, maxY);
 
-    noBtn.style.left = x + "px";
-    noBtn.style.top  = y + "px";
+    noFloat.style.left = x + "px";
+    noFloat.style.top  = y + "px";
 
-    noBtn.animate(
+    noFloat.animate(
       [{ transform: "scale(0.96)" }, { transform: "scale(1)" }],
-      { duration: 120, easing: "ease-out" }
+      { duration: 140, easing: "ease-out" }
     );
   }
 
-  // На ПК — убегает при наведении
-  noBtn.addEventListener("mouseenter", spawnNoButton);
+  // стартовая позиция
+  spawnNo();
 
-  // На телефоне — убегает при попытке нажать
-  noBtn.addEventListener("touchstart", (e) => {
+  // убегает при попытке нажать
+  noFloat.addEventListener("touchstart", (e)=>{
     e.preventDefault();
     e.stopPropagation();
-    spawnNoButton();
-  }, { passive:false });
+    spawnNo();
+  }, {passive:false});
 
-  // И если всё же “кликнули” — тоже убегает
-  noBtn.addEventListener("click", (e) => {
+  noFloat.addEventListener("click", (e)=>{
     e.preventDefault();
     e.stopPropagation();
-    spawnNoButton();
+    spawnNo();
   });
 
-  // При смене размера/повороте экрана — чтобы не оказался за пределами
-  window.addEventListener("resize", () => {
-    if (getComputedStyle(noBtn).position === "fixed") spawnNoButton();
+  // если экран повернули/изменили размер — пересчитать
+  window.addEventListener("resize", ()=>{
+    if(noFloat.style.display !== "none") spawnNo();
   });
 
-  // ====== Модалка подарков ======
+  // ====== модалка ======
   const overlay = document.getElementById("overlay");
   const modalTitle = document.getElementById("modalTitle");
   const modalBody = document.getElementById("modalBody");
@@ -439,9 +442,9 @@
     modalBody.innerHTML = "";
   }
   closeModal.addEventListener("click", hideModal);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) hideModal(); });
+  overlay.addEventListener("click", (e)=>{ if(e.target===overlay) hideModal(); });
 
-  // ====== Контент (замени пути на свои файлы) ======
+  // ====== контент ======
   const content = {
     flowers: {
       title: "Цветы 🌸",
