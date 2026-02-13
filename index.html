@@ -461,15 +461,27 @@
     spawnNo();
   }
 
-  noFloat.addEventListener("touchstart", onNoAttempt, {passive:false});
-  noFloat.addEventListener("click", onNoAttempt);
+  let noCount = 0;
 
-  // ✅ FIX: при ресайзе — если ещё не убегал, держим возле "ДА", иначе пересчитываем рандом
-  window.addEventListener("resize", ()=>{
-    if(noFloat.style.display === "none") return;
-    if(!noEscapedOnce) placeNoNearYes();
-    else spawnNo();
-  });
+function showNoMsg(){
+  alert("Да нажми ты уже «ДА» 😄");
+}
+
+noFloat.addEventListener("touchstart", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  noCount++;
+  if(noCount >= 5){ showNoMsg(); noCount = 0; }
+  spawnNo();
+}, {passive:false});
+
+noFloat.addEventListener("click", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  noCount++;
+  if(noCount >= 5){ showNoMsg(); noCount = 0; }
+  spawnNo();
+});
 
   // ====== модалка ======
   const overlay = document.getElementById("overlay");
