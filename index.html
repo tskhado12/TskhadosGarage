@@ -365,7 +365,7 @@
     let x = r.left - w - pad;
     let y = r.top + (r.height - h) / 2;
 
-    if (x < 10) x = r.right + pad; // если слева не помещается — справа
+    if (x < 10) x = r.right + pad - 40; // сдвиг влево на 40px; // если слева не помещается — справа
 
     const maxX = window.innerWidth - w - 10;
     const maxY = window.innerHeight - h - 10;
