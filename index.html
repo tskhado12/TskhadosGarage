@@ -484,7 +484,7 @@ noFloat.addEventListener("touchstart", (e)=>{
   e.preventDefault();
   e.stopPropagation();
   noCount++;
-  if(noCount >= 5){ showNoMsg(); noCount = 0; }
+  if(noCount >= 3){ showNoMsg(); noCount = 0; }
   spawnNo();
 }, {passive:false});
 
@@ -492,7 +492,7 @@ noFloat.addEventListener("click", (e)=>{
   e.preventDefault();
   e.stopPropagation();
   noCount++;
-  if(noCount >= 5){ showNoMsg(); noCount = 0; }
+  if(noCount >= 3){ showNoMsg(); noCount = 0; }
   spawnNo();
 });
 
