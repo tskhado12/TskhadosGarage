@@ -49,7 +49,6 @@
       padding:22px;
       backdrop-filter: blur(10px);
       position:relative;
-      /* ВАЖНО: пусть карточка не режет элементы (на всякий случай) */
       overflow: visible;
     }
     .card::before{
@@ -351,21 +350,32 @@
   const noFloat = document.getElementById("noFloat");
   noFloat.style.display = "block";
 
-  yesBtn.addEventListener("click", () => {
-    screen1.classList.add("hidden");
-    screen2.classList.remove("hidden");
-    noFloat.style.display = "none"; // на меню подарков НЕТ не нужен
-  });
+  // ✅ FIX: сначала "НЕТ" стоит нормально возле "ДА", а убегать начинает только после первого нажатия
+  let noEscapedOnce = false;
 
-  backToStart.addEventListener("click", () => {
-    screen2.classList.add("hidden");
-    screen1.classList.remove("hidden");
-    noFloat.style.display = "block";
-    spawnNo(); // чтоб сразу появился в норм месте
-  });
-
-  // ====== НЕТ спавнится по краям и не исчезает ======
   function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+  // ✅ FIX: поставить кнопку рядом с "ДА"
+  function placeNoNearYes(){
+    const r = yesBtn.getBoundingClientRect();
+    const pad = 10;
+    const w = noFloat.offsetWidth || 160;
+    const h = noFloat.offsetHeight || 44;
+
+    let x = r.left - w - pad;
+    let y = r.top + (r.height - h) / 2;
+
+    if (x < 10) x = r.right + pad; // если слева не помещается — справа
+
+    const maxX = window.innerWidth - w - 10;
+    const maxY = window.innerHeight - h - 10;
+
+    x = clamp(x, 10, maxX);
+    y = clamp(y, 10, maxY);
+
+    noFloat.style.left = x + "px";
+    noFloat.style.top  = y + "px";
+  }
 
   function spawnNo(){
     const pad = 12;
@@ -375,20 +385,19 @@
     const maxX = window.innerWidth - w - pad;
     const maxY = window.innerHeight - h - pad;
 
-    // зоны (реально сверху/снизу/слева/справа)
     const zone = Math.floor(Math.random()*4);
     let x=pad, y=pad;
 
-    if(zone===0){ // TOP
+    if(zone===0){
       x = pad + Math.random()*maxX;
       y = pad + Math.random()*90;
-    } else if(zone===1){ // BOTTOM
+    } else if(zone===1){
       x = pad + Math.random()*maxX;
       y = maxY - Math.random()*90;
-    } else if(zone===2){ // LEFT
+    } else if(zone===2){
       x = pad + Math.random()*90;
       y = pad + Math.random()*maxY;
-    } else { // RIGHT
+    } else {
       x = maxX - Math.random()*90;
       y = pad + Math.random()*maxY;
     }
@@ -405,25 +414,45 @@
     );
   }
 
-  // стартовая позиция
-  spawnNo();
+  // ✅ FIX: старт — ставим рядом с "ДА" (и НЕ рандомим)
+  requestAnimationFrame(()=> placeNoNearYes());
 
-  // убегает при попытке нажать
-  noFloat.addEventListener("touchstart", (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-    spawnNo();
-  }, {passive:false});
-
-  noFloat.addEventListener("click", (e)=>{
-    e.preventDefault();
-    e.stopPropagation();
-    spawnNo();
+  yesBtn.addEventListener("click", () => {
+    screen1.classList.add("hidden");
+    screen2.classList.remove("hidden");
+    noFloat.style.display = "none";
   });
 
-  // если экран повернули/изменили размер — пересчитать
+  backToStart.addEventListener("click", () => {
+    screen2.classList.add("hidden");
+    screen1.classList.remove("hidden");
+    noFloat.style.display = "block";
+    // ✅ FIX: при возврате на старт снова ставим рядом с "ДА"
+    requestAnimationFrame(()=> placeNoNearYes());
+    noEscapedOnce = false; // ✅ FIX: снова "первый раз"
+  });
+
+  // ✅ FIX: убегает только после первого нажатия
+  function onNoAttempt(e){
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!noEscapedOnce){
+      noEscapedOnce = true;
+      spawnNo(); // первый раз — сразу начинает жизнь
+      return;
+    }
+    spawnNo();
+  }
+
+  noFloat.addEventListener("touchstart", onNoAttempt, {passive:false});
+  noFloat.addEventListener("click", onNoAttempt);
+
+  // ✅ FIX: при ресайзе — если ещё не убегал, держим возле "ДА", иначе пересчитываем рандом
   window.addEventListener("resize", ()=>{
-    if(noFloat.style.display !== "none") spawnNo();
+    if(noFloat.style.display === "none") return;
+    if(!noEscapedOnce) placeNoNearYes();
+    else spawnNo();
   });
 
   // ====== модалка ======
@@ -460,9 +489,9 @@
       html: `
         <p style="margin-top:0;color:rgba(255,255,255,.75)">Пара моментов, которые я люблю.</p>
         <div class="photos">
-          <img src="assets/10a29ae3-e0e8-423e-9295-5de488dac1e1.jpg" alt="memory 1">
-          <img src="assets/89dac9f5-13e9-47a3-822e-2c09fcd52adb.jpg" alt="memory 2">
-          <img src="assets/a1b66de5-38c0-4a28-b52f-f04d0e62c0db.jpg" alt="memory 3">
+          <img src="assets/m1.jpg" alt="memory 1">
+          <img src="assets/m2.jpg" alt="memory 2">
+          <img src="assets/m3.jpg" alt="memory 3">
         </div>
       `
     },
